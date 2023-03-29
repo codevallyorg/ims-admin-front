@@ -1,0 +1,24 @@
+.toolBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  padding: 16px 8px;
+}
+
+.rightSide {
+  display: flex;
+  gap: 16px;
+}
+
+.dropdown {
+  cursor: pointer;
+}
+
+.dropdown:hover {
+  color: #1890ff;
+}
+
+.searchBar {
+  width: 264px;
+}
