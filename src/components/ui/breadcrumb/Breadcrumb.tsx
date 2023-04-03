@@ -1,35 +1,29 @@
-import { Alert, Breadcrumb as BreadcrumbAntd } from 'antd';
+import { Breadcrumb as BreadcrumbAntd } from 'antd';
 import React from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-
-// const Apps = () => (
-//   <ul className="app-list">
-//     <li>
-//       <Link href="/apps/1">Application1</Link>：
-//       <Link href="/apps/1/detail">Detail</Link>
-//     </li>
-//     <li>
-//       <Link href="/apps/2">Application2</Link>：
-//       <Link href="/apps/2/detail">Detail</Link>
-//     </li>
-//   </ul>
-// );
+import {
+  USERS,
+  ARCHIVED_USERS,
+  PORTAL_USERS,
+  TDR_USERS,
+  INVITE_NEW_PORTAL_USER,
+} from '@/utils/constants';
 
 const breadcrumbNameMap: Record<string, string> = {
-  '/apps': 'Application List',
-  '/apps/1': 'Application1',
-  '/apps/2': 'Application2',
-  '/apps/1/detail': 'Detail',
-  '/apps/2/detail': 'Detail',
+  '/users': USERS,
+  '/users/portal-users': PORTAL_USERS,
+  '/users/portal-users/invite-new-portal-user': INVITE_NEW_PORTAL_USER,
+  '/users/tdr-users': TDR_USERS,
+  '/users/archived-users': ARCHIVED_USERS,
 };
 
-const Home = () => {
+const Breadcrumb = () => {
   const router = useRouter();
 
   const pathSnippets = router.pathname.split('/').filter((i: any) => i);
 
-  const extraBreadcrumbItems = pathSnippets.map((_, index: number) => {
+  const breadcrumbItems = pathSnippets.map((_, index: number) => {
     const url = `/${pathSnippets.slice(0, index + 1).join('/')}`;
     return (
       <BreadcrumbAntd.Item key={url}>
@@ -38,32 +32,11 @@ const Home = () => {
     );
   });
 
-  const breadcrumbItems = [
-    <BreadcrumbAntd.Item key="home">
-      <Link href="/">Home</Link>
-    </BreadcrumbAntd.Item>,
-  ].concat(extraBreadcrumbItems);
-
   return (
     <div className="demo">
       <BreadcrumbAntd>{breadcrumbItems}</BreadcrumbAntd>
-
-      <div className="demo-nav">
-        <div>
-          <Link href="/">Home</Link>
-        </div>
-        <div>
-          <Link href="/apps">Application List</Link>
-        </div>
-      </div>
     </div>
   );
 };
-
-const Breadcrumb: React.FC = () => (
-  //   <HashRouter>
-  <Home />
-  //   </HashRouter>
-);
 
 export default Breadcrumb;

@@ -26,7 +26,7 @@ const Table: FC<CustomTableProps> = ({
     <div>
       <TableToolbar {...toolbarProps} />
 
-      <TableAntd {...tableProps} pagination={{ hideOnSinglePage: true }} />
+      <TableAntd {...tableProps} />
     </div>
   );
 };

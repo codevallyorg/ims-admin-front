@@ -2,16 +2,14 @@ import Private from '@/components/layout/Private';
 import { withLayout } from '@/components/layout/utils';
 import Table from '@/components/ui/table/Table';
 import { NEUTRAL_5, SECONDARY_ORANGE, SECONDARY_RED } from '@/utils/colors';
-import { ROUTE_INVITE_NEW_PORTAL_USER } from '@/utils/constants';
 import { Badge, Space } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import moment from 'moment';
-import { useRouter } from 'next/router';
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 
-import styles from './PortalUsers.module.css';
+import styles from './ArchivedUsers.module.css';
 
-interface PortalUserDataType {
+interface ArchivedUserDatatype {
   key: number;
   firstName: string;
   lastName: string;
@@ -21,7 +19,7 @@ interface PortalUserDataType {
   updatedAt: string;
 }
 
-const columns: ColumnsType<PortalUserDataType> = [
+const columns: ColumnsType<ArchivedUserDatatype> = [
   {
     title: 'First name',
     dataIndex: 'firstName',
@@ -78,7 +76,7 @@ const columns: ColumnsType<PortalUserDataType> = [
   },
 ];
 
-const data: PortalUserDataType[] = [
+const data: ArchivedUserDatatype[] = [
   {
     key: 1,
     firstName: 'Sipho',
@@ -135,31 +133,12 @@ const data: PortalUserDataType[] = [
   },
 ];
 
-const PortalUsers: FC = () => {
-  const [page, setPage] = useState<number>(1);
-
-  const router = useRouter();
-
-  useEffect(() => {
-    const { page: curPage } = router.query;
-
-    if (!curPage) {
-      router.replace({ query: { ...router.query, page: 1 } });
-    } else {
-      setPage(+curPage);
-    }
-  }, [router]);
-
-  const onClickInvite = () => {
-    router.push(ROUTE_INVITE_NEW_PORTAL_USER);
-  };
-
+const ArchivedUsers: FC = () => {
   return (
     <Table
-      name="Portal Users"
+      name="Archived Users"
       viewButtonLabel="View Report"
       inviteButtonLabel="Invite new Portal User"
-      onClickInvite={onClickInvite}
       columns={columns}
       dataSource={data}
       rowSelection={{
@@ -167,9 +146,8 @@ const PortalUsers: FC = () => {
         // onChange: selectRowHandler,
       }}
       rowClassName={styles.row}
-      pagination={{ hideOnSinglePage: true, current: page }}
     />
   );
 };
 
-export default withLayout(PortalUsers, Private);
+export default withLayout(ArchivedUsers, Private);

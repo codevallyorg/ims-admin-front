@@ -1,18 +1,21 @@
+import { Form, Input, Space } from 'antd';
+import { useRouter } from 'next/router';
+import { FC, useState } from 'react';
+
+import Public from '@/components/layout/Public';
+import { withLayout } from '@/components/layout/utils';
 import Button from '@/components/ui/button/Button';
 import FairPayLogo from '@/icons/FairPayLogo';
 import Auth from '@/services/auth';
 import { LoginPayload } from '@/types/payloads/auth';
 import { PRIMARY_BLUE } from '@/utils/colors';
-import { ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
-import { Form, Input, Space } from 'antd';
-import { useRouter } from 'next/router';
-import { FC, useState } from 'react';
 import styles from './ExistingUserLogin.module.css';
+import { useAuthContext } from '@/contexts/AuthProvider';
 
 const ExistingUserLogin: FC = () => {
   const [loading, setLoading] = useState(false);
 
-  const router = useRouter();
+  const { getUser } = useAuthContext();
 
   const onSubmit = async (data: LoginPayload) => {
     try {
@@ -20,7 +23,7 @@ const ExistingUserLogin: FC = () => {
 
       await Auth.login(data);
 
-      router.replace(ROUTE_DASHBOARD_PORTAL_USERS);
+      getUser();
     } catch (err: any) {
       console.error(err);
     } finally {
@@ -87,4 +90,4 @@ const ExistingUserLogin: FC = () => {
   );
 };
 
-export default ExistingUserLogin;
+export default withLayout(ExistingUserLogin, Public);

@@ -18,6 +18,10 @@ import styles from './Sider.module.css';
 import { PRIMARY_BLUE } from '@/utils/colors';
 import Header from '@/components/ui/header/Header';
 import Breadcrumb from '@/components/ui/breadcrumb/Breadcrumb';
+import UsersPageHeader from '@/components/pages/users-page-header/UsersPageHeader';
+import { useRouter } from 'next/router';
+import { ROUTE_USERS } from '@/utils/constants';
+import { useAuthContext } from '@/contexts/AuthProvider';
 
 const { Content, Sider } = Layout;
 
@@ -84,9 +88,16 @@ const items: MenuItem[] = [
 const SiderLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
 
+  const router = useRouter();
+  const { user, authLoading } = useAuthContext();
+
   const breakpointHandler = (broken: boolean) => {
     if (broken) setCollapsed(true);
   };
+
+  if (!user && !authLoading) {
+    return <>{children}</>;
+  }
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -96,6 +107,7 @@ const SiderLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         onCollapse={(value) => setCollapsed(value)}
         theme="light"
         trigger={null}
+        className={styles.sider}
         breakpoint="sm"
         onBreakpoint={breakpointHandler}
       >
@@ -119,16 +131,29 @@ const SiderLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <Layout className="site-layout">
         <Header />
 
-        <Content style={{ margin: '0 16px' }}>
-          <Breadcrumb />
+        <Divider style={{ margin: 0 }} />
 
-          <div
-            className="site-layout-background"
-            style={{ padding: 24, minHeight: 360 }}
-          >
-            {children}
-          </div>
-        </Content>
+        {router.pathname !== ROUTE_USERS && (
+          <Content>
+            <div style={{ padding: '16px 24px 0', backgroundColor: '#ffffff' }}>
+              <Breadcrumb />
+
+              <UsersPageHeader />
+            </div>
+
+            <div
+              className="site-layout-background"
+              style={{
+                margin: '20px 24px',
+                padding: 24,
+                backgroundColor: '#ffffff',
+                minHeight: 360,
+              }}
+            >
+              {children}
+            </div>
+          </Content>
+        )}
       </Layout>
     </Layout>
   );

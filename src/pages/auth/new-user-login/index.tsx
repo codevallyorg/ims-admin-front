@@ -1,8 +1,11 @@
+import { Form, Input } from 'antd';
+import { FC } from 'react';
+
+import Public from '@/components/layout/Public';
+import { withLayout } from '@/components/layout/utils';
 import Button from '@/components/ui/button/Button';
 import FairPayLogo from '@/icons/FairPayLogo';
 import { classNames } from '@/utils/general';
-import { Form, Input } from 'antd';
-import { FC } from 'react';
 import styles from './NewUserLogin.module.css';
 
 const NewUserLogin: FC = () => {
@@ -49,4 +52,4 @@ const NewUserLogin: FC = () => {
   );
 };
 
-export default NewUserLogin;
+export default withLayout(NewUserLogin, Public);

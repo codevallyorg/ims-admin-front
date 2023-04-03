@@ -1,4 +1,3 @@
-import { PRIMARY_BLUE } from '@/utils/colors';
 import { DownOutlined, PlusOutlined } from '@ant-design/icons';
 import { Dropdown, Space } from 'antd';
 import Search from 'antd/lib/input/Search';
@@ -51,11 +50,7 @@ const TableToolbar: FC<TableToolbarProps> = ({
         )}
 
         {inviteButtonLabel && (
-          <Button
-            style={{ backgroundColor: PRIMARY_BLUE }}
-            type="primary"
-            onClick={onClickInvite}
-          >
+          <Button type="primary" onClick={onClickInvite}>
             <Space>
               <PlusOutlined />
 
