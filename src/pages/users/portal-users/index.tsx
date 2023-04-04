@@ -1,15 +1,21 @@
-import Private from '@/components/layout/Private';
-import { withLayout } from '@/components/layout/utils';
-import Table from '@/components/ui/table/Table';
-import { NEUTRAL_5, SECONDARY_ORANGE, SECONDARY_RED } from '@/utils/colors';
-import { ROUTE_INVITE_NEW_PORTAL_USER } from '@/utils/constants';
-import { Badge, Space } from 'antd';
+import { Badge } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
 
+import Private from '@/components/layout/Private';
+import { withLayout } from '@/components/layout/utils';
+import Table from '@/components/ui/table/Table';
+import { NEUTRAL_5, SECONDARY_ORANGE, SECONDARY_RED } from '@/utils/colors';
+import {
+  ROUTE_DASHBOARD_PORTAL_USERS,
+  ROUTE_INVITE_NEW_PORTAL_USER,
+} from '@/utils/constants';
 import styles from './PortalUsers.module.css';
+import User from '@/services/user';
+import { UserStatus } from '@/types/entities/IUser';
+import Link from 'next/link';
 
 interface PortalUserDataType {
   key: number;
@@ -43,8 +49,9 @@ const columns: ColumnsType<PortalUserDataType> = [
   },
   {
     title: 'Assigned role',
-    dataIndex: 'roleName',
-    key: 'roleName',
+    dataIndex: 'role',
+    key: 'role',
+    render: (role) => role.name,
   },
   {
     title: 'Status',
@@ -52,9 +59,9 @@ const columns: ColumnsType<PortalUserDataType> = [
     key: 'status',
     render: (status: string) => {
       const color =
-        status === 'Invite sent'
+        status === UserStatus.Invited
           ? SECONDARY_RED
-          : status === 'Logged in'
+          : status === UserStatus.LoggedIn
           ? SECONDARY_ORANGE
           : NEUTRAL_5;
 
@@ -70,76 +77,25 @@ const columns: ColumnsType<PortalUserDataType> = [
   {
     title: 'Action',
     key: 'action',
-    render: () => (
-      <Space size="middle">
-        <a>Edit</a>
-      </Space>
+    render: (_, { key }) => (
+      <Link
+        href={`${ROUTE_DASHBOARD_PORTAL_USERS}/${key}/edit-user-profile`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        Edit
+      </Link>
     ),
-  },
-];
-
-const data: PortalUserDataType[] = [
-  {
-    key: 1,
-    firstName: 'Sipho',
-    lastName: 'Dhlanmi',
-    email: 'sipho@imsglobal.co.za',
-    roleName: 'SuperAdmin',
-    status: 'Invite sent',
-    updatedAt: new Date(2022, 1, 23).toISOString(),
-  },
-  {
-    key: 2,
-    firstName: 'Faizal',
-    lastName: 'Mahomed',
-    email: 'fmahomed@imsglobal.co.za',
-    roleName: 'Admin',
-    status: 'Logged in',
-    updatedAt: new Date(2022, 4, 23).toISOString(),
-  },
-  {
-    key: 3,
-    firstName: 'Sue',
-    lastName: 'Howkaye',
-    email: 'showkay@fairpay.co.za',
-    roleName: 'TDR',
-    status: 'Logged out',
-    updatedAt: new Date(2022, 7, 23).toISOString(),
-  },
-  {
-    key: 4,
-    firstName: 'Sipho',
-    lastName: 'Dhlanmi',
-    email: 'sipho@imsglobal.co.za',
-    roleName: 'SuperAdmin',
-    status: 'Invite sent',
-    updatedAt: new Date(2022, 1, 23).toISOString(),
-  },
-  {
-    key: 5,
-    firstName: 'Faizal',
-    lastName: 'Mahomed',
-    email: 'fmahomed@imsglobal.co.za',
-    roleName: 'Admin',
-    status: 'Logged in',
-    updatedAt: new Date(2022, 4, 23).toISOString(),
-  },
-  {
-    key: 6,
-    firstName: 'Sue',
-    lastName: 'Howkaye',
-    email: 'showkay@fairpay.co.za',
-    roleName: 'TDR',
-    status: 'Logged out',
-    updatedAt: new Date(2022, 7, 23).toISOString(),
   },
 ];
 
 const PortalUsers: FC = () => {
   const [page, setPage] = useState<number>(1);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [users, setUsers] = useState<PortalUserDataType[]>([]);
 
   const router = useRouter();
 
+  // handle route query page defect
   useEffect(() => {
     const { page: curPage } = router.query;
 
@@ -154,6 +110,29 @@ const PortalUsers: FC = () => {
     router.push(ROUTE_INVITE_NEW_PORTAL_USER);
   };
 
+  useEffect(() => {
+    const loadPortalUsers = async () => {
+      try {
+        setLoading(true);
+
+        const { data: users } = await User.getAllPortalUsers();
+
+        // TO DELETE
+        for (const user of users) {
+          user.key = user.id;
+        }
+
+        setUsers(users);
+      } catch (err: any) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPortalUsers();
+  }, []);
+
   return (
     <Table
       name="Portal Users"
@@ -161,11 +140,19 @@ const PortalUsers: FC = () => {
       inviteButtonLabel="Invite new Portal User"
       onClickInvite={onClickInvite}
       columns={columns}
-      dataSource={data}
+      dataSource={users}
       rowSelection={{
         type: 'checkbox',
         // onChange: selectRowHandler,
       }}
+      onRow={({ id }) => {
+        return {
+          onClick: () => {
+            router.push(`${ROUTE_DASHBOARD_PORTAL_USERS}/${id}`);
+          },
+        };
+      }}
+      loading={loading}
       rowClassName={styles.row}
       pagination={{ hideOnSinglePage: true, current: page }}
     />

@@ -1,11 +1,11 @@
 export enum UserType {
-  Portal,
-  TDR,
+  Portal = 'Portal',
+  TDR = 'TDR',
 }
 
 export enum UserStatus {
-  Invited,
-  LoggedIn,
+  Invited = 'Invited',
+  LoggedIn = 'Loggedin',
 }
 
 export type IUser = {
@@ -21,6 +21,9 @@ export type IUser = {
   createdAt: string;
   updatedAt: string;
   tdrProfile?: ITDRProfile;
+  role: {
+    name: string;
+  };
 };
 
 type ITDRProfile = {
