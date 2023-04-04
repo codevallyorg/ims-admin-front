@@ -16,10 +16,20 @@ export const getAllPortalUsers = () => {
   );
 };
 
-export const getPortalUser = (id: number) => {
+export const getUser = (id: number) => {
   return axiosInstance.get(endpointUrl(`users/${id}`));
 };
 
 export const editPortalUser = (id: number, payload: EditPortalUserPayload) => {
   return axiosInstance.patch(endpointUrl(`users/${id}`), payload);
+};
+
+export const resetPassword = (id: number) => {
+  return axiosInstance.post(endpointUrl(`users/reset-password/${id}`));
+};
+
+export const updatePassword = (id: number, password: string) => {
+  return axiosInstance.patch(endpointUrl(`users/update-password/${id}`), {
+    password,
+  });
 };

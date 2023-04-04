@@ -16,10 +16,9 @@ export default class Auth {
     return data;
   }
 
-  //   static async signup(payload: any) {
-  //     const { data } = await createUser(payload);
-  //     return data;
-  //   }
+  static logout() {
+    this.removeToken();
+  }
 
   static setToken(token: string) {
     localStorage.setItem(TOKEN, token);

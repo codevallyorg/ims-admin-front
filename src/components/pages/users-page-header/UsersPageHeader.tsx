@@ -1,3 +1,7 @@
+import { PageHeader, Tabs } from 'antd';
+import { useRouter } from 'next/router';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+
 import {
   ARCHIVED_USERS,
   INVITE_NEW_PORTAL_USER,
@@ -12,9 +16,11 @@ import {
   TDR_USERS,
   USERS,
 } from '@/utils/constants';
-import { PageHeader, Tabs } from 'antd';
-import { useRouter } from 'next/router';
-import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import { EllipsisOutlined } from '@ant-design/icons';
+import Button from '@/components/ui/button/Button';
+import styles from './UsersPageHeader.module.css';
+import ResetPasswordModal from '../modals/reset-password/ResetPasswordModal';
+import User from '@/services/user';
 
 const items = [
   { label: PORTAL_USERS, key: PORTAL_USERS },
@@ -33,7 +39,12 @@ const UsersPageHeader: React.FC = () => {
   const [title, setTitle] = useState<string>();
   const [footer, setFooter] = useState<ReactNode>();
 
+  const [loading, setLoading] = useState<boolean>(false);
+  const [openResetPasswordModal, setOpenResetPasswordModal] =
+    useState<boolean>(false);
+
   const router = useRouter();
+  const { id } = router.query;
 
   const onBackArrowClick = () => {
     router.push(ROUTE_USERS);
@@ -78,6 +89,36 @@ const UsersPageHeader: React.FC = () => {
     }
   }, [router, onTabChange]);
 
+  const onClickResetPassword = () => {
+    setOpenResetPasswordModal(true);
+  };
+
+  const onSendResetPassword = async () => {
+    try {
+      if (!id || isNaN(+id)) return;
+
+      setLoading(true);
+
+      const linkSent = await User.resetPassword(+id);
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setOpenResetPasswordModal(false);
+      setLoading(false);
+    }
+  };
+
+  const onCancelResetPassword = () => {
+    setOpenResetPasswordModal(false);
+  };
+
+  const resetPasswordModalProps = {
+    loading,
+    open: openResetPasswordModal,
+    onSend: onSendResetPassword,
+    onCancel: onCancelResetPassword,
+  };
+
   return (
     <PageHeader
       className="site-page-header-responsive"
@@ -85,6 +126,18 @@ const UsersPageHeader: React.FC = () => {
       onBack={title === USERS ? onBackArrowClick : undefined}
       title={title}
       footer={footer}
+      extra={
+        router.pathname.includes('[id]') && [
+          <Button key="3">Edit</Button>,
+          <Button key="2" onClick={onClickResetPassword}>
+            Reset Password
+          </Button>,
+          <Button key="1" className={styles.ellipsisButton}>
+            <EllipsisOutlined />
+          </Button>,
+          <ResetPasswordModal key="0" {...resetPasswordModalProps} />,
+        ]
+      }
     ></PageHeader>
   );
 };
