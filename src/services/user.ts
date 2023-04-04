@@ -1,8 +1,10 @@
 import {
   editPortalUser,
   getAllPortalUsers,
-  getPortalUser,
+  getUser,
   invitePortalUser,
+  resetPassword,
+  updatePassword,
 } from '@/apis/user';
 import {
   EditPortalUserPayload,
@@ -20,13 +22,23 @@ export default class User {
     return data;
   }
 
-  static async getPortalUser(id: number) {
-    const { data } = await getPortalUser(id);
+  static async getUser(id: number) {
+    const { data } = await getUser(id);
     return data;
   }
 
   static async editPortalUser(id: number, payload: EditPortalUserPayload) {
     const { data } = await editPortalUser(id, payload);
+    return data;
+  }
+
+  static async resetPassword(id: number) {
+    const { data } = await resetPassword(id);
+    return data;
+  }
+
+  static async updatePassword(id: number, password: string) {
+    const { data } = await updatePassword(id, password);
     return data;
   }
 }

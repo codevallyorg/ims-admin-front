@@ -24,7 +24,7 @@ const ViewUserProfile: FC = () => {
 
         setLoading(true);
 
-        const user = await User.getPortalUser(+id);
+        const user = await User.getUser(+id);
 
         const key = `${ROUTE_DASHBOARD_PORTAL_USERS}/${id}`;
         const value = `${user.firstName} ${user.lastName}`;

@@ -95,7 +95,10 @@ const SiderLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (broken) setCollapsed(true);
   };
 
-  if (!user && !authLoading) {
+  if (!user) {
+    if (authLoading) {
+      return <></>;
+    }
     return <>{children}</>;
   }
 

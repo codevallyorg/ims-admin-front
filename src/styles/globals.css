@@ -1,10 +1,5 @@
 @import '~antd/dist/antd.css';
 
-@font-face {
-  font-family: 'Poppins';
-  src: url('../assets/fonts/Poppins-Regular.ttf');
-}
-
 html {
   max-width: 100vw;
   max-height: 100vh;
@@ -12,7 +7,6 @@ html {
 }
 
 #__next {
-  font-family: 'Poppins' !important;
   background-color: #f0f2f5;
   height: 100%;
   width: 100%;
