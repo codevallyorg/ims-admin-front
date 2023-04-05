@@ -1,5 +1,5 @@
-import { login, whoAmI } from '@/apis/auth';
-import { LoginPayload } from '@/types/payloads/auth';
+import { getInvitedUser, login, newUserLogin, whoAmI } from '@/apis/auth';
+import { LoginPayload, NewUserLogin } from '@/types/payloads/auth';
 
 const TOKEN = 'Token';
 
@@ -7,8 +7,6 @@ export default class Auth {
   static async login(payload: LoginPayload) {
     const { data } = await login(payload);
     this.setToken(data.access_token);
-
-    return data;
   }
 
   static async whoAmI() {
@@ -18,6 +16,16 @@ export default class Auth {
 
   static logout() {
     this.removeToken();
+  }
+
+  static async getInvitedUser(token: string) {
+    const { data } = await getInvitedUser(token);
+    return data;
+  }
+
+  static async newUserLogin(payload: NewUserLogin) {
+    const { data } = await newUserLogin(payload);
+    this.setToken(data.access_token);
   }
 
   static setToken(token: string) {

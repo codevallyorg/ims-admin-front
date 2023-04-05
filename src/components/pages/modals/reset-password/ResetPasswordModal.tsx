@@ -5,6 +5,7 @@ import Button from '@/components/ui/button/Button';
 import styles from './ResetPasswordModal.module.css';
 import { useBreadcrumbContext } from '@/contexts/BreadcrumbProvider';
 import { ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
+import { poppins } from '@/utils/general';
 
 type ResetPasswordModalProps = {
   open: boolean;
@@ -29,7 +30,7 @@ const ResetPasswordModal: FC<ResetPasswordModalProps> = ({
 
   return (
     <Modal
-      className={styles.modal}
+      style={poppins.style}
       open={open}
       title={modalTitle}
       onCancel={onCancel}
