@@ -1,11 +1,13 @@
-import { PageHeader, Tabs } from 'antd';
+import { Dropdown, PageHeader, Tabs } from 'antd';
 import { useRouter } from 'next/router';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 
 import {
+  ARCHIVE,
   ARCHIVED_USERS,
   INVITE_NEW_PORTAL_USER,
   INVITE_NEW_TDR_USER,
+  LOCK_PROFILE,
   PORTAL_USERS,
   ROUTE_DASHBOARD_ARCHIVED_USERS,
   ROUTE_DASHBOARD_PORTAL_USERS,
@@ -21,12 +23,23 @@ import Button from '@/components/ui/button/Button';
 import styles from './UsersPageHeader.module.css';
 import ResetPasswordModal from '../modals/reset-password/ResetPasswordModal';
 import User from '@/services/user';
-import { typeCastQuery } from '@/utils/general';
+import {
+  showErrorNotification,
+  showNotification,
+  typeCastQuery,
+} from '@/utils/general';
+import { UserType } from '@/types/entities/IUser';
+import ArchiveUserProfile from '../modals/archive-user-profile/ArchiveUserProfile';
 
-const items = [
+const tabItems = [
   { label: PORTAL_USERS, key: PORTAL_USERS },
   { label: TDR_USERS, key: TDR_USERS },
   { label: ARCHIVED_USERS, key: ARCHIVED_USERS },
+];
+
+const dropdownItems = [
+  { label: LOCK_PROFILE, key: LOCK_PROFILE },
+  { label: ARCHIVE, key: ARCHIVE },
 ];
 
 const inviteFooter = (
@@ -42,6 +55,8 @@ const UsersPageHeader: React.FC = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [openResetPasswordModal, setOpenResetPasswordModal] =
+    useState<boolean>(false);
+  const [openArchiveUserModal, setOpenArchiveUserModal] =
     useState<boolean>(false);
 
   const router = useRouter();
@@ -86,7 +101,7 @@ const UsersPageHeader: React.FC = () => {
 
       default:
         setTitle(USERS);
-        setFooter(<Tabs onChange={onTabChange} items={items} />);
+        setFooter(<Tabs onChange={onTabChange} items={tabItems} />);
     }
   }, [router, onTabChange]);
 
@@ -108,7 +123,7 @@ const UsersPageHeader: React.FC = () => {
 
       setLoading(true);
 
-      const linkSent = await User.resetPassword(+id);
+      const response = await User.resetPassword(+id);
     } catch (err: any) {
       console.error(err);
     } finally {
@@ -128,6 +143,40 @@ const UsersPageHeader: React.FC = () => {
     onCancel: onCancelResetPassword,
   };
 
+  const onClickDropdownItem = (info: any) => {
+    if (info.key === ARCHIVE) {
+      setOpenArchiveUserModal(true);
+    }
+  };
+
+  const onArchiveUserProfile = async () => {
+    try {
+      if (!id || isNaN(+id)) return;
+
+      setLoading(true);
+
+      const response = await User.archiveUserProfile(+id);
+    } catch (err: any) {
+      console.error(err);
+      showErrorNotification(err);
+    } finally {
+      setOpenArchiveUserModal(false);
+      setLoading(false);
+    }
+  };
+
+  const onCancelArchiveUser = () => {
+    setOpenArchiveUserModal(false);
+  };
+
+  const archiveUserModalProps = {
+    loading,
+    open: openArchiveUserModal,
+    userType: UserType.Portal,
+    onArchive: onArchiveUserProfile,
+    onCancel: onCancelArchiveUser,
+  };
+
   return (
     <PageHeader
       className="site-page-header-responsive"
@@ -144,9 +193,22 @@ const UsersPageHeader: React.FC = () => {
           <Button key="2" onClick={onClickResetPassword}>
             Reset Password
           </Button>,
-          <Button key="1" className={styles.ellipsisButton}>
-            <EllipsisOutlined />
-          </Button>,
+          <Dropdown
+            key="1"
+            menu={{
+              items: dropdownItems,
+              onClick: onClickDropdownItem,
+            }}
+            placement="bottomRight"
+            trigger={['click']}
+            overlayStyle={{ width: 120 }}
+          >
+            <Button className={styles.ellipsisButton}>
+              <EllipsisOutlined />
+
+              <ArchiveUserProfile {...archiveUserModalProps} />
+            </Button>
+          </Dropdown>,
           <ResetPasswordModal key="0" {...resetPasswordModalProps} />,
         ]
       }

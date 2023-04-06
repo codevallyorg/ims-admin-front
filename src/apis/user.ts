@@ -25,3 +25,7 @@ export const editPortalUser = (id: number, payload: EditPortalUserPayload) => {
 export const resetPassword = (id: number) => {
   return axiosInstance.post(endpointUrl(`users/reset-password/${id}`));
 };
+
+export const archiveUserProfile = (id: number) => {
+  return axiosInstance.patch(endpointUrl(`users/archive/${id}`));
+};
