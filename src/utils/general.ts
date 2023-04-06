@@ -1,5 +1,15 @@
 import { PaginationOptions } from '@/types/payloads/pagination';
+import { notification } from 'antd';
+import { IconType } from 'antd/lib/notification';
 import localFont from 'next/font/local';
+import { ReactNode } from 'react';
+
+type NotificationProps = {
+  message: string;
+  description: string;
+  icon?: ReactNode;
+  type?: IconType;
+};
 
 export const classNames = (...classes: string[]) => {
   return classes.filter(Boolean).join(' ');
@@ -11,6 +21,25 @@ export const endpointUrl = (url: string | undefined) => {
 
 export const typeCastQuery = (query?: string | string[] | number): string => {
   return typeof query === 'string' ? query : '';
+};
+
+export const showNotification = (notificationData: NotificationProps) => {
+  const { message, description, icon } = notificationData;
+
+  notification.open({
+    message,
+    description,
+    icon,
+    style: poppins.style,
+  });
+};
+
+export const showErrorNotification = (error: any) => {
+  showNotification({
+    type: 'error',
+    message: 'Error',
+    description: error.message,
+  });
 };
 
 export const getPaginatedUrl = (

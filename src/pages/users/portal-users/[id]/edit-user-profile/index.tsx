@@ -9,6 +9,9 @@ import { ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
 import Private from '@/components/layout/Private';
 import { withLayout } from '@/components/layout/utils';
 import { useBreadcrumbContext } from '@/contexts/BreadcrumbProvider';
+import { showErrorNotification, showNotification } from '@/utils/general';
+import { BellOutlined } from '@ant-design/icons';
+import { PRIMARY_BLUE } from '@/utils/colors';
 
 const EditUserProfile: FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -62,8 +65,14 @@ const EditUserProfile: FC = () => {
       await User.editPortalUser(+id, data);
 
       router.push(ROUTE_DASHBOARD_PORTAL_USERS);
+      showNotification({
+        message: 'Portal User Update',
+        description: `${data.firstName} ${data.lastName}'s user profile has been updated.`,
+        icon: <BellOutlined style={{ color: PRIMARY_BLUE }} />,
+      });
     } catch (err: any) {
       console.error(err);
+      showErrorNotification(err);
     } finally {
       setSubmitting(false);
     }
