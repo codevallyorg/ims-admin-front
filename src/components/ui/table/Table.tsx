@@ -10,6 +10,8 @@ const Table: FC<CustomTableProps> = ({
   name,
   viewButtonLabel,
   inviteButtonLabel,
+  selectedRoleKey,
+  onSelectRole,
   onClickView,
   onClickInvite,
   ...tableProps
@@ -18,6 +20,8 @@ const Table: FC<CustomTableProps> = ({
     name,
     viewButtonLabel,
     inviteButtonLabel,
+    selectedRoleKey,
+    onSelectRole,
     onClickView,
     onClickInvite,
   };

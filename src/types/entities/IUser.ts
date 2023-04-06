@@ -5,7 +5,7 @@ export enum UserType {
 
 export enum UserStatus {
   Invited = 'Invited',
-  LoggedIn = 'Loggedin',
+  LoggedIn = 'LoggedIn',
 }
 
 export type IUser = {

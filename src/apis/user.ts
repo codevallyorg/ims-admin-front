@@ -1,19 +1,17 @@
-import { UserType } from '@/types/entities/IUser';
+import { PaginationOptions } from '@/types/payloads/pagination';
 import {
   EditPortalUserPayload,
   InvitePortalUserPayload,
 } from '@/types/payloads/user';
-import { endpointUrl } from '@/utils/general';
+import { endpointUrl, getPaginatedUrl } from '@/utils/general';
 import axiosInstance from './axios';
 
 export const invitePortalUser = (payload: InvitePortalUserPayload) => {
   return axiosInstance.post(endpointUrl('users'), payload);
 };
 
-export const getAllPortalUsers = () => {
-  return axiosInstance.get(
-    endpointUrl(`users?filterByType=${UserType.Portal}`),
-  );
+export const getAllPortalUsers = (pageOptions: PaginationOptions) => {
+  return axiosInstance.get(getPaginatedUrl(`users`, pageOptions));
 };
 
 export const getUser = (id: number) => {
@@ -26,10 +24,4 @@ export const editPortalUser = (id: number, payload: EditPortalUserPayload) => {
 
 export const resetPassword = (id: number) => {
   return axiosInstance.post(endpointUrl(`users/reset-password/${id}`));
-};
-
-export const updatePassword = (id: number, password: string) => {
-  return axiosInstance.patch(endpointUrl(`users/update-password/${id}`), {
-    password,
-  });
 };

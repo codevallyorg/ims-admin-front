@@ -21,6 +21,7 @@ import Button from '@/components/ui/button/Button';
 import styles from './UsersPageHeader.module.css';
 import ResetPasswordModal from '../modals/reset-password/ResetPasswordModal';
 import User from '@/services/user';
+import { typeCastQuery } from '@/utils/general';
 
 const items = [
   { label: PORTAL_USERS, key: PORTAL_USERS },
@@ -93,6 +94,14 @@ const UsersPageHeader: React.FC = () => {
     setOpenResetPasswordModal(true);
   };
 
+  const onClickEdit = () => {
+    const preparedRoute = router.pathname
+      .replace('[id]', typeCastQuery(router.query.id))
+      .concat('/edit-user-profile');
+
+    router.push(preparedRoute);
+  };
+
   const onSendResetPassword = async () => {
     try {
       if (!id || isNaN(+id)) return;
@@ -127,8 +136,11 @@ const UsersPageHeader: React.FC = () => {
       title={title}
       footer={footer}
       extra={
-        router.pathname.includes('[id]') && [
-          <Button key="3">Edit</Button>,
+        router.pathname.includes('[id]') &&
+        !router.pathname.includes('edit-user-profile') && [
+          <Button key="3" onClick={onClickEdit}>
+            Edit
+          </Button>,
           <Button key="2" onClick={onClickResetPassword}>
             Reset Password
           </Button>,

@@ -1,3 +1,4 @@
+import { PaginationOptions } from '@/types/payloads/pagination';
 import localFont from 'next/font/local';
 
 export const classNames = (...classes: string[]) => {
@@ -6,6 +7,63 @@ export const classNames = (...classes: string[]) => {
 
 export const endpointUrl = (url: string | undefined) => {
   return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/${url}`;
+};
+
+export const typeCastQuery = (query?: string | string[] | number): string => {
+  return typeof query === 'string' ? query : '';
+};
+
+export const getPaginatedUrl = (
+  url: string,
+  paginationOptions: PaginationOptions,
+) => {
+  let paginatedEndpoint = '';
+
+  const {
+    page,
+    take,
+    orderBy,
+    order,
+    filterByType,
+    filterByStatus,
+    filterByRole,
+  } = paginationOptions;
+
+  if (page) {
+    paginatedEndpoint = paginatedEndpoint.concat(`page=${page}&`);
+  }
+
+  if (take) {
+    paginatedEndpoint = paginatedEndpoint.concat(`take=${take}&`);
+  }
+
+  if (orderBy) {
+    paginatedEndpoint = paginatedEndpoint.concat(`orderBy=${orderBy}&`);
+  }
+
+  if (order) {
+    paginatedEndpoint = paginatedEndpoint.concat(`order=${order}&`);
+  }
+
+  if (filterByType) {
+    paginatedEndpoint = paginatedEndpoint.concat(
+      `filterByType=${filterByType}&`,
+    );
+  }
+
+  if (filterByStatus) {
+    paginatedEndpoint = paginatedEndpoint.concat(
+      `filterByStatus=${filterByStatus}&`,
+    );
+  }
+
+  if (filterByRole) {
+    paginatedEndpoint = paginatedEndpoint.concat(
+      `filterByRole=${filterByRole}&`,
+    );
+  }
+
+  return endpointUrl(`${url}?${paginatedEndpoint}`);
 };
 
 export const poppins = localFont({

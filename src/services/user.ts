@@ -4,8 +4,13 @@ import {
   getUser,
   invitePortalUser,
   resetPassword,
-  updatePassword,
 } from '@/apis/user';
+import { UserType } from '@/types/entities/IUser';
+import {
+  OrderByEnum,
+  OrderEnum,
+  PaginationOptions,
+} from '@/types/payloads/pagination';
 import {
   EditPortalUserPayload,
   InvitePortalUserPayload,
@@ -17,8 +22,10 @@ export default class User {
     return data;
   }
 
-  static async getAllPortalUsers() {
-    const { data } = await getAllPortalUsers();
+  static async getAllPortalUsers(paginationOptions: PaginationOptions) {
+    paginationOptions.filterByType = UserType.Portal;
+
+    const { data } = await getAllPortalUsers(paginationOptions);
     return data;
   }
 
@@ -34,11 +41,6 @@ export default class User {
 
   static async resetPassword(id: number) {
     const { data } = await resetPassword(id);
-    return data;
-  }
-
-  static async updatePassword(id: number, password: string) {
-    const { data } = await updatePassword(id, password);
     return data;
   }
 }

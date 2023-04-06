@@ -1,23 +1,27 @@
-import { Badge } from 'antd';
-import { ColumnsType } from 'antd/lib/table';
-import moment from 'moment';
+import { TablePaginationConfig } from 'antd/lib/table';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
 
 import Private from '@/components/layout/Private';
 import { withLayout } from '@/components/layout/utils';
 import Table from '@/components/ui/table/Table';
-import { NEUTRAL_5, SECONDARY_ORANGE, SECONDARY_RED } from '@/utils/colors';
 import {
   ROUTE_DASHBOARD_PORTAL_USERS,
   ROUTE_INVITE_NEW_PORTAL_USER,
 } from '@/utils/constants';
 import styles from './PortalUsers.module.css';
 import User from '@/services/user';
-import { UserStatus } from '@/types/entities/IUser';
-import Link from 'next/link';
+import { typeCastQuery } from '@/utils/general';
+import {
+  OrderByEnum,
+  OrderEnum,
+  PageMeta,
+  PaginationOptions,
+} from '@/types/payloads/pagination';
+import { FilterValue } from 'antd/lib/table/interface';
+import { columns } from './columns';
 
-interface PortalUserDataType {
+export interface PortalUserDataType {
   key: number;
   firstName: string;
   lastName: string;
@@ -27,95 +31,42 @@ interface PortalUserDataType {
   updatedAt: string;
 }
 
-const columns: ColumnsType<PortalUserDataType> = [
-  {
-    title: 'First name',
-    dataIndex: 'firstName',
-    key: 'firstName',
-    sorter: (a, b) =>
-      a.firstName > b.firstName ? 1 : a.firstName < b.firstName ? -1 : 0,
-  },
-  {
-    title: 'Last name',
-    dataIndex: 'lastName',
-    key: 'lastName',
-    sorter: (a, b) =>
-      a.lastName > b.lastName ? 1 : a.lastName < b.lastName ? -1 : 0,
-  },
-  {
-    title: 'Email address',
-    dataIndex: 'email',
-    key: 'email',
-  },
-  {
-    title: 'Assigned role',
-    dataIndex: 'role',
-    key: 'role',
-    render: (role) => role.name,
-  },
-  {
-    title: 'Status',
-    dataIndex: 'status',
-    key: 'status',
-    render: (status: string) => {
-      const color =
-        status === UserStatus.Invited
-          ? SECONDARY_RED
-          : status === UserStatus.LoggedIn
-          ? SECONDARY_ORANGE
-          : NEUTRAL_5;
-
-      return <Badge color={color} text={status} />;
-    },
-  },
-  {
-    title: 'Timestamp',
-    dataIndex: 'updatedAt',
-    key: 'updatedAt',
-    render: (time: string) => moment(time).format('HH:mm:ss DD MMM, YYYY'),
-  },
-  {
-    title: 'Action',
-    key: 'action',
-    render: (_, { key }) => (
-      <Link
-        href={`${ROUTE_DASHBOARD_PORTAL_USERS}/${key}/edit-user-profile`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        Edit
-      </Link>
-    ),
-  },
-];
-
 const PortalUsers: FC = () => {
-  const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [users, setUsers] = useState<PortalUserDataType[]>([]);
+  const [pageMeta, setPageMeta] = useState<PageMeta>();
+  const [possibleTotalUsers, setPossibleTotalUsers] = useState<number>(0);
 
   const router = useRouter();
 
   // handle route query page defect
   useEffect(() => {
-    const { page: curPage } = router.query;
+    const { page: curPage, orderBy } = router.query;
+
+    const queryProps: PaginationOptions = {};
+
+    if (curPage && orderBy) return;
 
     if (!curPage) {
-      router.replace({ query: { ...router.query, page: 1 } });
-    } else {
-      setPage(+curPage);
+      queryProps.page = 1;
     }
-  }, [router]);
 
-  const onClickInvite = () => {
-    router.push(ROUTE_INVITE_NEW_PORTAL_USER);
-  };
+    if (!orderBy) {
+      queryProps.orderBy = OrderByEnum.updatedAt;
+      queryProps.order = OrderEnum.desc;
+    }
+
+    router.replace({ query: { ...router.query, ...queryProps } });
+  }, [router]);
 
   useEffect(() => {
     const loadPortalUsers = async () => {
       try {
         setLoading(true);
 
-        const { data: users } = await User.getAllPortalUsers();
+        const { data: users, meta } = await User.getAllPortalUsers(
+          router.query,
+        );
 
         // TO DELETE
         for (const user of users) {
@@ -123,6 +74,7 @@ const PortalUsers: FC = () => {
         }
 
         setUsers(users);
+        setPageMeta(meta);
       } catch (err: any) {
         console.error(err);
       } finally {
@@ -131,7 +83,83 @@ const PortalUsers: FC = () => {
     };
 
     loadPortalUsers();
-  }, []);
+  }, [router.query]);
+
+  useEffect(() => {
+    let possibleTotalUsers = +typeCastQuery(router.query.page) * 10;
+
+    if (pageMeta?.hasNextPage) {
+      possibleTotalUsers += 10;
+    }
+
+    setPossibleTotalUsers(possibleTotalUsers);
+  }, [pageMeta, router.query]);
+
+  const onClickInvite = () => {
+    router.push(ROUTE_INVITE_NEW_PORTAL_USER);
+  };
+
+  const onSelectRole = (props: any) => {
+    const { filterByRole } = router.query;
+
+    let roleKey = undefined;
+
+    if (filterByRole !== props.key) {
+      roleKey = props.key;
+    }
+
+    router.replace({ query: { ...router.query, filterByRole: roleKey } });
+  };
+
+  const applyPagination = (
+    pagination: TablePaginationConfig,
+    paginationOptions: PaginationOptions,
+  ) => {
+    const { page } = router.query;
+
+    if (pagination.current !== page) {
+      paginationOptions.page = pagination.current;
+    }
+  };
+
+  const applySorts = (sorts: any, paginationOptions: PaginationOptions) => {
+    const { orderBy, order } = router.query;
+
+    if (!sorts.order) {
+      paginationOptions.orderBy = undefined;
+      paginationOptions.order = undefined;
+      return;
+    }
+
+    const sortOrder = sorts.order === 'ascend' ? OrderEnum.asc : OrderEnum.desc;
+    const sortField =
+      sorts.field === OrderByEnum.firstName
+        ? OrderByEnum.firstName
+        : OrderByEnum.lastName;
+
+    if (sortField !== orderBy || sortOrder !== order) {
+      paginationOptions.orderBy = sortField;
+      paginationOptions.order = sortOrder;
+    }
+  };
+
+  const tableActionsHandler = (
+    pagination: TablePaginationConfig,
+    filters: Record<string, FilterValue | null>,
+    sorts: any,
+  ) => {
+    const paginationOptions: PaginationOptions = {};
+
+    applyPagination(pagination, paginationOptions);
+    applySorts(sorts, paginationOptions);
+
+    router.replace({
+      query: {
+        ...router.query,
+        ...paginationOptions,
+      },
+    });
+  };
 
   return (
     <Table
@@ -145,6 +173,18 @@ const PortalUsers: FC = () => {
         type: 'checkbox',
         // onChange: selectRowHandler,
       }}
+      loading={loading}
+      rowClassName={styles.row}
+      onChange={tableActionsHandler}
+      selectedRoleKey={typeCastQuery(router.query.filterByRole)}
+      onSelectRole={onSelectRole}
+      pagination={{
+        responsive: true,
+        hideOnSinglePage:
+          pageMeta?.page === 1 && pageMeta.hasNextPage === false,
+        current: +typeCastQuery(router.query.page) || 1,
+        total: possibleTotalUsers,
+      }}
       onRow={({ id }) => {
         return {
           onClick: () => {
@@ -152,9 +192,6 @@ const PortalUsers: FC = () => {
           },
         };
       }}
-      loading={loading}
-      rowClassName={styles.row}
-      pagination={{ hideOnSinglePage: true, current: page }}
     />
   );
 };
