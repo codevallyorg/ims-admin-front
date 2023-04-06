@@ -1,4 +1,5 @@
 import {
+  archiveUserProfile,
   editPortalUser,
   getAllPortalUsers,
   getUser,
@@ -41,6 +42,11 @@ export default class User {
 
   static async resetPassword(id: number) {
     const { data } = await resetPassword(id);
+    return data;
+  }
+
+  static async archiveUserProfile(id: number) {
+    const { data } = await archiveUserProfile(id);
     return data;
   }
 }
