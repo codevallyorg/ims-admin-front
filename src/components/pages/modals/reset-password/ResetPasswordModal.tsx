@@ -44,6 +44,7 @@ const ResetPasswordModal: FC<ResetPasswordModalProps> = ({
       ]}
     >
       <div className={styles.body}>
+        {/* TODO - show correct email id */}
         <p>
           You are about to reset {userName}&apos;s password, a reset password
           link will be sent to email@email.com
