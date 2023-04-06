@@ -29,3 +29,7 @@ export const resetPassword = (id: number) => {
 export const archiveUserProfile = (id: number) => {
   return axiosInstance.patch(endpointUrl(`users/archive/${id}`));
 };
+
+export const toggleUserProfileLock = (id: number) => {
+  return axiosInstance.patch(endpointUrl(`users/toggle-locked/${id}`));
+};

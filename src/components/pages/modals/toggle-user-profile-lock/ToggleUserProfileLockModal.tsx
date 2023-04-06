@@ -1,30 +1,34 @@
-import { Modal } from 'antd';
+import { Modal, Select } from 'antd';
 import { FC } from 'react';
+import { useRouter } from 'next/router';
 
-import { UserType } from '@/types/entities/IUser';
 import { poppins } from '@/utils/general';
 import Button from '@/components/ui/button/Button';
-import styles from './ArchiveUserProfile.module.css';
-import { useRouter } from 'next/router';
+import styles from './ToggleUserProfileLockModal.module.css';
 import { useBreadcrumbContext } from '@/contexts/BreadcrumbProvider';
 import { ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
 
-type ArchiveUserProfileProps = {
+export enum UserProfileLockType {
+  LOCK = 'Lock',
+  UNLOCK = 'Unlock',
+}
+
+type ToggleUserProfileLockModalProps = {
   open: boolean;
   loading: boolean;
-  userType: UserType;
+  actionType: UserProfileLockType;
   onCancel: () => void;
-  onArchive: () => void;
+  onSubmit: () => void;
 };
 
 const modalTitle = <div>Archive User Profile</div>;
 
-const ArchiveUserProfile: FC<ArchiveUserProfileProps> = ({
+const ToggleUserProfileLockModal: FC<ToggleUserProfileLockModalProps> = ({
   open,
   loading,
-  userType,
+  actionType,
   onCancel,
-  onArchive,
+  onSubmit,
 }) => {
   const router = useRouter();
   const { breadcrumbNameMap } = useBreadcrumbContext();
@@ -47,26 +51,30 @@ const ArchiveUserProfile: FC<ArchiveUserProfileProps> = ({
           key="submit"
           type="primary"
           loading={loading}
-          onClick={onArchive}
+          onClick={onSubmit}
         >
-          Archive
+          {actionType}
         </Button>,
       ]}
     >
       <div className={styles.body}>
         <p>
-          You are about to archive {userName}&apos;s {userType} User Profile.
+          Please select a reason for{' '}
+          {actionType === UserProfileLockType.LOCK ? 'locking' : 'unlocking'}{' '}
+          {userName}&apos;s profile.
         </p>
 
         <p>
-          Once the profile has been archived, the process cannot be reversed and
-          the user will be unable to access the FairPay admin portal.
+          <Select placeholder="Select a reason" />
         </p>
 
-        <span>Would you like to proceed?</span>
+        <span>
+          Once the profile has been archived, the user will be unable to access
+          the FairPay Admin Portal.
+        </span>
       </div>
     </Modal>
   );
 };
 
-export default ArchiveUserProfile;
+export default ToggleUserProfileLockModal;

@@ -5,6 +5,7 @@ import {
   getUser,
   invitePortalUser,
   resetPassword,
+  toggleUserProfileLock,
 } from '@/apis/user';
 import { UserType } from '@/types/entities/IUser';
 import {
@@ -47,6 +48,11 @@ export default class User {
 
   static async archiveUserProfile(id: number) {
     const { data } = await archiveUserProfile(id);
+    return data;
+  }
+
+  static async toggleUserProfileLock(id: number) {
+    const { data } = await toggleUserProfileLock(id);
     return data;
   }
 }

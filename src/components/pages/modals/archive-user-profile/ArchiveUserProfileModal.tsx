@@ -1,26 +1,30 @@
 import { Modal } from 'antd';
 import { FC } from 'react';
-import { useRouter } from 'next/router';
+
+import { UserType } from '@/types/entities/IUser';
+import { poppins } from '@/utils/general';
 import Button from '@/components/ui/button/Button';
-import styles from './ResetPasswordModal.module.css';
+import styles from './ArchiveUserProfileModal.module.css';
+import { useRouter } from 'next/router';
 import { useBreadcrumbContext } from '@/contexts/BreadcrumbProvider';
 import { ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
-import { poppins } from '@/utils/general';
 
-type ResetPasswordModalProps = {
+type ArchiveUserProfileModalProps = {
   open: boolean;
   loading: boolean;
+  userType: UserType;
   onCancel: () => void;
-  onSend: () => void;
+  onArchive: () => void;
 };
 
-const modalTitle = <div>Reset Password</div>;
+const modalTitle = <div>Archive User Profile</div>;
 
-const ResetPasswordModal: FC<ResetPasswordModalProps> = ({
+const ArchiveUserProfileModal: FC<ArchiveUserProfileModalProps> = ({
   open,
   loading,
+  userType,
   onCancel,
-  onSend,
+  onArchive,
 }) => {
   const router = useRouter();
   const { breadcrumbNameMap } = useBreadcrumbContext();
@@ -39,16 +43,24 @@ const ResetPasswordModal: FC<ResetPasswordModalProps> = ({
         <Button key="back" onClick={onCancel}>
           Cancel
         </Button>,
-        <Button key="submit" type="primary" loading={loading} onClick={onSend}>
-          Send
+        <Button
+          key="submit"
+          type="primary"
+          loading={loading}
+          onClick={onArchive}
+        >
+          Archive
         </Button>,
       ]}
     >
       <div className={styles.body}>
-        {/* TODO - show correct email id */}
         <p>
-          You are about to reset {userName}&apos;s password, a reset password
-          link will be sent to email@email.com
+          You are about to archive {userName}&apos;s {userType} User Profile.
+        </p>
+
+        <p>
+          Once the profile has been archived, the process cannot be reversed and
+          the user will be unable to access the FairPay admin portal.
         </p>
 
         <span>Would you like to proceed?</span>
@@ -57,4 +69,4 @@ const ResetPasswordModal: FC<ResetPasswordModalProps> = ({
   );
 };
 
-export default ResetPasswordModal;
+export default ArchiveUserProfileModal;
