@@ -44,7 +44,7 @@ const ToggleUserProfileLockModal: FC<ToggleUserProfileLockModalProps> = ({
       title={modalTitle}
       onCancel={onCancel}
       footer={[
-        <Button key="back" onClick={onCancel}>
+        <Button key="back" disabled={loading} onClick={onCancel}>
           Cancel
         </Button>,
         <Button
@@ -65,7 +65,7 @@ const ToggleUserProfileLockModal: FC<ToggleUserProfileLockModalProps> = ({
         </p>
 
         <p>
-          <Select placeholder="Select a reason" />
+          <Select placeholder="Select a reason" className={styles.select} />
         </p>
 
         <span>

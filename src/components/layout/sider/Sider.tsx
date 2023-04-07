@@ -18,7 +18,7 @@ import styles from './Sider.module.css';
 import { PRIMARY_BLUE } from '@/utils/colors';
 import Header from '@/components/ui/header/Header';
 import Breadcrumb from '@/components/ui/breadcrumb/Breadcrumb';
-import UsersPageHeader from '@/components/pages/users-page-header/UsersPageHeader';
+import UsersPageHeader from '@/components/pages/components/users-page-header/UsersPageHeader';
 import { useRouter } from 'next/router';
 import { ROUTE_USERS } from '@/utils/constants';
 import { useAuthContext } from '@/contexts/AuthProvider';

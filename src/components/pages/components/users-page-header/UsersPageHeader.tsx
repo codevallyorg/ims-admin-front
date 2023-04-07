@@ -21,14 +21,14 @@ import {
 import { EllipsisOutlined } from '@ant-design/icons';
 import Button from '@/components/ui/button/Button';
 import styles from './UsersPageHeader.module.css';
-import ResetPasswordModal from '../modals/reset-password/ResetPasswordModal';
 import User from '@/services/user';
 import { showErrorNotification, typeCastQuery } from '@/utils/general';
 import { UserType } from '@/types/entities/IUser';
-import ArchiveUserProfileModal from '../modals/archive-user-profile/ArchiveUserProfileModal';
+import ArchiveUserProfileModal from '../../modals/archive-user-profile/ArchiveUserProfileModal';
 import ToggleUserProfileLockModal, {
   UserProfileLockType,
-} from '../modals/toggle-user-profile-lock/ToggleUserProfileLockModal';
+} from '../../modals/toggle-user-profile-lock/ToggleUserProfileLockModal';
+import ResetPasswordModal from '../../modals/reset-password/ResetPasswordModal';
 
 const tabItems = [
   { label: PORTAL_USERS, key: PORTAL_USERS },

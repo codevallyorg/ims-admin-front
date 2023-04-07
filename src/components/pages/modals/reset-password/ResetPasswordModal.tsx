@@ -36,7 +36,7 @@ const ResetPasswordModal: FC<ResetPasswordModalProps> = ({
       title={modalTitle}
       onCancel={onCancel}
       footer={[
-        <Button key="back" onClick={onCancel}>
+        <Button key="back" disabled={loading} onClick={onCancel}>
           Cancel
         </Button>,
         <Button key="submit" type="primary" loading={loading} onClick={onSend}>

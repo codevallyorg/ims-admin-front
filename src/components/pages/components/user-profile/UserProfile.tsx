@@ -1,7 +1,6 @@
 import { useAuthContext } from '@/contexts/AuthProvider';
 import Auth from '@/services/auth';
 import { CHARACTER_SECONDARY, PRIMARY_BLUE } from '@/utils/colors';
-import { ROUTE_EXISTING_USER_LOGIN } from '@/utils/constants';
 import {
   CaretDownOutlined,
   FileOutlined,
@@ -15,7 +14,7 @@ import { FC, ReactNode } from 'react';
 import styles from './UserProfile.module.css';
 
 const UserProfile: FC = () => {
-  const { getUser } = useAuthContext();
+  const { user, getUser } = useAuthContext();
 
   const onItemClick = (title: string) => {
     switch (title) {
@@ -64,8 +63,12 @@ const UserProfile: FC = () => {
         <Avatar icon={<UserOutlined />} />
 
         <div className={styles.userInfo}>
-          <span>Full Name</span>
-          <span style={{ color: CHARACTER_SECONDARY, fontSize: 12 }}>Role</span>
+          <span>
+            {user?.firstName} {user?.lastName}
+          </span>
+          <span style={{ color: CHARACTER_SECONDARY, fontSize: 12 }}>
+            {user?.role.name}
+          </span>
         </div>
 
         <CaretDownOutlined style={{ color: PRIMARY_BLUE }} />
