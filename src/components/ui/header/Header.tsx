@@ -1,10 +1,10 @@
-import UserProfile from '@/components/pages/user-profile/UserProfile';
-import { PRIMARY_BLUE } from '@/utils/colors';
-import { SettingOutlined, BellOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
 import { FC } from 'react';
-import Badge from '../badge/Badge';
 
+import Badge from '../badge/Badge';
+import UserProfile from '@/components/pages/components/user-profile/UserProfile';
+import { PRIMARY_BLUE } from '@/utils/colors';
+import { SettingOutlined, BellOutlined } from '@ant-design/icons';
 import styles from './Header.module.css';
 
 const { Header: Head } = Layout;

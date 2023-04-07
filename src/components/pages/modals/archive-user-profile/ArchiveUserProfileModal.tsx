@@ -4,12 +4,12 @@ import { FC } from 'react';
 import { UserType } from '@/types/entities/IUser';
 import { poppins } from '@/utils/general';
 import Button from '@/components/ui/button/Button';
-import styles from './ArchiveUserProfile.module.css';
+import styles from './ArchiveUserProfileModal.module.css';
 import { useRouter } from 'next/router';
 import { useBreadcrumbContext } from '@/contexts/BreadcrumbProvider';
 import { ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
 
-type ArchiveUserProfileProps = {
+type ArchiveUserProfileModalProps = {
   open: boolean;
   loading: boolean;
   userType: UserType;
@@ -19,7 +19,7 @@ type ArchiveUserProfileProps = {
 
 const modalTitle = <div>Archive User Profile</div>;
 
-const ArchiveUserProfile: FC<ArchiveUserProfileProps> = ({
+const ArchiveUserProfileModal: FC<ArchiveUserProfileModalProps> = ({
   open,
   loading,
   userType,
@@ -40,7 +40,7 @@ const ArchiveUserProfile: FC<ArchiveUserProfileProps> = ({
       title={modalTitle}
       onCancel={onCancel}
       footer={[
-        <Button key="back" onClick={onCancel}>
+        <Button key="back" disabled={loading} onClick={onCancel}>
           Cancel
         </Button>,
         <Button
@@ -69,4 +69,4 @@ const ArchiveUserProfile: FC<ArchiveUserProfileProps> = ({
   );
 };
 
-export default ArchiveUserProfile;
+export default ArchiveUserProfileModal;

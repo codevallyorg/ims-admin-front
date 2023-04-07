@@ -21,15 +21,14 @@ import {
 import { EllipsisOutlined } from '@ant-design/icons';
 import Button from '@/components/ui/button/Button';
 import styles from './UsersPageHeader.module.css';
-import ResetPasswordModal from '../modals/reset-password/ResetPasswordModal';
 import User from '@/services/user';
-import {
-  showErrorNotification,
-  showNotification,
-  typeCastQuery,
-} from '@/utils/general';
+import { showErrorNotification, typeCastQuery } from '@/utils/general';
 import { UserType } from '@/types/entities/IUser';
-import ArchiveUserProfile from '../modals/archive-user-profile/ArchiveUserProfile';
+import ArchiveUserProfileModal from '../../modals/archive-user-profile/ArchiveUserProfileModal';
+import ToggleUserProfileLockModal, {
+  UserProfileLockType,
+} from '../../modals/toggle-user-profile-lock/ToggleUserProfileLockModal';
+import ResetPasswordModal from '../../modals/reset-password/ResetPasswordModal';
 
 const tabItems = [
   { label: PORTAL_USERS, key: PORTAL_USERS },
@@ -57,6 +56,8 @@ const UsersPageHeader: React.FC = () => {
   const [openResetPasswordModal, setOpenResetPasswordModal] =
     useState<boolean>(false);
   const [openArchiveUserModal, setOpenArchiveUserModal] =
+    useState<boolean>(false);
+  const [openToggleUserProfileLockModal, setOpenToggleUserProfileLockModal] =
     useState<boolean>(false);
 
   const router = useRouter();
@@ -146,6 +147,8 @@ const UsersPageHeader: React.FC = () => {
   const onClickDropdownItem = (info: any) => {
     if (info.key === ARCHIVE) {
       setOpenArchiveUserModal(true);
+    } else {
+      setOpenToggleUserProfileLockModal(true);
     }
   };
 
@@ -177,6 +180,34 @@ const UsersPageHeader: React.FC = () => {
     onCancel: onCancelArchiveUser,
   };
 
+  const onToggleUserProfileLock = async () => {
+    try {
+      if (!id || isNaN(+id)) return;
+
+      setLoading(true);
+
+      const response = await User.toggleUserProfileLock(+id);
+    } catch (err: any) {
+      console.error(err);
+      showErrorNotification(err);
+    } finally {
+      setOpenToggleUserProfileLockModal(false);
+      setLoading(false);
+    }
+  };
+
+  const onCancelUserProfileLock = () => {
+    setOpenToggleUserProfileLockModal(false);
+  };
+
+  const toggleUserProfileLockModalProps = {
+    loading,
+    open: openToggleUserProfileLockModal,
+    actionType: UserProfileLockType.LOCK,
+    onSubmit: onToggleUserProfileLock,
+    onCancel: onCancelUserProfileLock,
+  };
+
   return (
     <PageHeader
       className="site-page-header-responsive"
@@ -187,14 +218,14 @@ const UsersPageHeader: React.FC = () => {
       extra={
         router.pathname.includes('[id]') &&
         !router.pathname.includes('edit-user-profile') && [
-          <Button key="3" onClick={onClickEdit}>
+          <Button key="0" onClick={onClickEdit}>
             Edit
           </Button>,
-          <Button key="2" onClick={onClickResetPassword}>
+          <Button key="1" onClick={onClickResetPassword}>
             Reset Password
           </Button>,
           <Dropdown
-            key="1"
+            key="2"
             menu={{
               items: dropdownItems,
               onClick: onClickDropdownItem,
@@ -205,11 +236,14 @@ const UsersPageHeader: React.FC = () => {
           >
             <Button className={styles.ellipsisButton}>
               <EllipsisOutlined />
-
-              <ArchiveUserProfile {...archiveUserModalProps} />
             </Button>
           </Dropdown>,
-          <ResetPasswordModal key="0" {...resetPasswordModalProps} />,
+          <ResetPasswordModal key="3" {...resetPasswordModalProps} />,
+          <ArchiveUserProfileModal key="4" {...archiveUserModalProps} />,
+          <ToggleUserProfileLockModal
+            key="5"
+            {...toggleUserProfileLockModalProps}
+          />,
         ]
       }
     ></PageHeader>
