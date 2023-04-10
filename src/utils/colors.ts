@@ -9,6 +9,6 @@ export const SECONDARY_ORANGE = '#F77B08';
 export const CHARACTER_PRIMARY = '#404040';
 export const CHARACTER_SECONDARY = '#8D8D8D';
 
-export const NEUTRAL_5 = '#F0F2F5';
+export const NEUTRAL_5 = '#D9D9D9';
 
 export const BLUE_400 = '#0076C6';

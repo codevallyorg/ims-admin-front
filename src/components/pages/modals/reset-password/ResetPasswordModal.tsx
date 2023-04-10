@@ -1,11 +1,8 @@
-import { Modal } from 'antd';
 import { FC } from 'react';
-import { useRouter } from 'next/router';
 import Button from '@/components/ui/button/Button';
 import styles from './ResetPasswordModal.module.css';
-import { useBreadcrumbContext } from '@/contexts/BreadcrumbProvider';
-import { ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
-import { poppins } from '@/utils/general';
+import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
+import Modal from '@/components/ui/modal/Modal';
 
 type ResetPasswordModalProps = {
   open: boolean;
@@ -22,33 +19,22 @@ const ResetPasswordModal: FC<ResetPasswordModalProps> = ({
   onCancel,
   onSend,
 }) => {
-  const router = useRouter();
-  const { breadcrumbNameMap } = useBreadcrumbContext();
-
-  // TODO - include ROUTE for TDR USERS
-  const userName =
-    breadcrumbNameMap[`${ROUTE_DASHBOARD_PORTAL_USERS}/${router.query.id}`];
+  const { selectedUser } = usePageHeaderContext();
 
   return (
     <Modal
-      style={poppins.style}
       open={open}
+      loading={loading}
       title={modalTitle}
       onCancel={onCancel}
-      footer={[
-        <Button key="back" disabled={loading} onClick={onCancel}>
-          Cancel
-        </Button>,
-        <Button key="submit" type="primary" loading={loading} onClick={onSend}>
-          Send
-        </Button>,
-      ]}
+      onSubmit={onSend}
+      okButtonLabel="Send"
     >
       <div className={styles.body}>
-        {/* TODO - show correct email id */}
         <p>
-          You are about to reset {userName}&apos;s password, a reset password
-          link will be sent to email@email.com
+          You are about to reset {selectedUser?.firstName}{' '}
+          {selectedUser?.lastName}&apos;s password, a reset password link will
+          be sent to {selectedUser?.email}
         </p>
 
         <span>Would you like to proceed?</span>

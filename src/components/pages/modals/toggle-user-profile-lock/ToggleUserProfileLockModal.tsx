@@ -1,12 +1,9 @@
-import { Modal, Select } from 'antd';
+import { Select } from 'antd';
 import { FC } from 'react';
-import { useRouter } from 'next/router';
 
-import { poppins } from '@/utils/general';
-import Button from '@/components/ui/button/Button';
 import styles from './ToggleUserProfileLockModal.module.css';
-import { useBreadcrumbContext } from '@/contexts/BreadcrumbProvider';
-import { ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
+import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
+import Modal from '@/components/ui/modal/Modal';
 
 export enum UserProfileLockType {
   LOCK = 'Lock',
@@ -16,52 +13,38 @@ export enum UserProfileLockType {
 type ToggleUserProfileLockModalProps = {
   open: boolean;
   loading: boolean;
-  actionType: UserProfileLockType;
   onCancel: () => void;
   onSubmit: () => void;
 };
 
-const modalTitle = <div>Archive User Profile</div>;
-
 const ToggleUserProfileLockModal: FC<ToggleUserProfileLockModalProps> = ({
   open,
   loading,
-  actionType,
   onCancel,
   onSubmit,
 }) => {
-  const router = useRouter();
-  const { breadcrumbNameMap } = useBreadcrumbContext();
+  const { selectedUser } = usePageHeaderContext();
 
-  // TODO - include ROUTE for TDR USERS
-  const userName =
-    breadcrumbNameMap[`${ROUTE_DASHBOARD_PORTAL_USERS}/${router.query.id}`];
+  const actionType = selectedUser?.locked
+    ? UserProfileLockType.UNLOCK
+    : UserProfileLockType.LOCK;
+
+  const modalTitle = <div>{actionType} User Profile</div>;
 
   return (
     <Modal
-      style={poppins.style}
       open={open}
+      loading={loading}
       title={modalTitle}
       onCancel={onCancel}
-      footer={[
-        <Button key="back" disabled={loading} onClick={onCancel}>
-          Cancel
-        </Button>,
-        <Button
-          key="submit"
-          type="primary"
-          loading={loading}
-          onClick={onSubmit}
-        >
-          {actionType}
-        </Button>,
-      ]}
+      onSubmit={onSubmit}
+      okButtonLabel={actionType}
     >
       <div className={styles.body}>
         <p>
           Please select a reason for{' '}
-          {actionType === UserProfileLockType.LOCK ? 'locking' : 'unlocking'}{' '}
-          {userName}&apos;s profile.
+          {selectedUser?.locked ? 'unlocking' : 'locking'}{' '}
+          {selectedUser?.firstName} {selectedUser?.lastName}&apos;s profile.
         </p>
 
         <p>
@@ -69,7 +52,7 @@ const ToggleUserProfileLockModal: FC<ToggleUserProfileLockModalProps> = ({
         </p>
 
         <span>
-          Once the profile has been archived, the user will be unable to access
+          Once the profile has been locked, the user will be unable to access
           the FairPay Admin Portal.
         </span>
       </div>

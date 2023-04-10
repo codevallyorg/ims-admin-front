@@ -20,7 +20,16 @@ export const endpointUrl = (url: string | undefined) => {
 };
 
 export const typeCastQuery = (query?: string | string[] | number): string => {
-  return typeof query === 'string' ? query : '';
+  return typeof query === 'string' || typeof query === 'number'
+    ? `${query}`
+    : '';
+};
+
+export const preparePathname = (
+  pathname: string,
+  id: string | string[] | number,
+) => {
+  return pathname.replace('[id]', typeCastQuery(id));
 };
 
 export const showNotification = (notificationData: NotificationProps) => {

@@ -20,7 +20,7 @@ export type PaginationOptions = {
   orderBy?: OrderByEnum;
   order?: OrderEnum;
   filterByType?: UserType;
-  filterByStatus?: UserStatus;
+  filterByStatus?: UserStatus[];
   filterByRole?: number;
 };
 

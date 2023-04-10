@@ -1,4 +1,10 @@
-import { Dropdown, PageHeader, Tabs } from 'antd';
+import {
+  Badge,
+  Dropdown,
+  PageHeader as PageHeaderAntd,
+  Space,
+  Tabs,
+} from 'antd';
 import { useRouter } from 'next/router';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 
@@ -14,21 +20,23 @@ import {
   ROUTE_DASHBOARD_TDR_USERS,
   ROUTE_INVITE_NEW_PORTAL_USER,
   ROUTE_INVITE_NEW_TDR_USER,
-  ROUTE_USERS,
   TDR_USERS,
-  USERS,
+  UNLOCK_PROFILE,
 } from '@/utils/constants';
 import { EllipsisOutlined } from '@ant-design/icons';
 import Button from '@/components/ui/button/Button';
-import styles from './UsersPageHeader.module.css';
+import styles from './PageHeader.module.css';
 import User from '@/services/user';
-import { showErrorNotification, typeCastQuery } from '@/utils/general';
-import { UserType } from '@/types/entities/IUser';
+import {
+  preparePathname,
+  showErrorNotification,
+  typeCastQuery,
+} from '@/utils/general';
 import ArchiveUserProfileModal from '../../modals/archive-user-profile/ArchiveUserProfileModal';
-import ToggleUserProfileLockModal, {
-  UserProfileLockType,
-} from '../../modals/toggle-user-profile-lock/ToggleUserProfileLockModal';
+import ToggleUserProfileLockModal from '../../modals/toggle-user-profile-lock/ToggleUserProfileLockModal';
 import ResetPasswordModal from '../../modals/reset-password/ResetPasswordModal';
+import { NEUTRAL_5 } from '@/utils/colors';
+import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
 
 const tabItems = [
   { label: PORTAL_USERS, key: PORTAL_USERS },
@@ -36,10 +44,18 @@ const tabItems = [
   { label: ARCHIVED_USERS, key: ARCHIVED_USERS },
 ];
 
-const dropdownItems = [
-  { label: LOCK_PROFILE, key: LOCK_PROFILE },
-  { label: ARCHIVE, key: ARCHIVE },
-];
+const getDrowdownItems = (lokedUser?: boolean) => {
+  const items = [
+    { label: LOCK_PROFILE, key: LOCK_PROFILE },
+    { label: ARCHIVE, key: ARCHIVE },
+  ];
+
+  if (lokedUser) {
+    items[0] = { label: UNLOCK_PROFILE, key: UNLOCK_PROFILE };
+  }
+
+  return items;
+};
 
 const inviteFooter = (
   <div style={{ paddingBottom: 14 }}>
@@ -48,7 +64,7 @@ const inviteFooter = (
   </div>
 );
 
-const UsersPageHeader: React.FC = () => {
+const PageHeader: React.FC = () => {
   const [title, setTitle] = useState<string>();
   const [footer, setFooter] = useState<ReactNode>();
 
@@ -60,11 +76,19 @@ const UsersPageHeader: React.FC = () => {
   const [openToggleUserProfileLockModal, setOpenToggleUserProfileLockModal] =
     useState<boolean>(false);
 
+  const { breadcrumbNameMap, selectedUser, getSelectedUser } =
+    usePageHeaderContext();
   const router = useRouter();
+  const { pathname } = router;
   const { id } = router.query;
 
   const onBackArrowClick = () => {
-    router.push(ROUTE_USERS);
+    const preparedPath = !id ? pathname : preparePathname(pathname, id);
+
+    const pathSnippets = preparedPath.split('/').filter((i: string) => i);
+    const url = `/${pathSnippets.slice(0, pathSnippets.length - 1).join('/')}`;
+
+    router.push(url);
   };
 
   const onTabChange = useCallback(
@@ -72,14 +96,17 @@ const UsersPageHeader: React.FC = () => {
       switch (activeKey) {
         case PORTAL_USERS:
           router.push(ROUTE_DASHBOARD_PORTAL_USERS);
+          setTitle(PORTAL_USERS);
           break;
 
         case TDR_USERS:
           router.push(ROUTE_DASHBOARD_TDR_USERS);
+          setTitle(TDR_USERS);
           break;
 
         case ARCHIVED_USERS:
           router.push(ROUTE_DASHBOARD_ARCHIVED_USERS);
+          setTitle(ARCHIVED_USERS);
           break;
       }
     },
@@ -87,24 +114,31 @@ const UsersPageHeader: React.FC = () => {
   );
 
   useEffect(() => {
-    const { pathname } = router;
+    const preparedPath = id ? preparePathname(pathname, id) : pathname;
 
-    switch (pathname) {
-      case ROUTE_INVITE_NEW_PORTAL_USER:
-        setTitle(INVITE_NEW_PORTAL_USER);
-        setFooter(inviteFooter);
-        break;
+    setTitle(breadcrumbNameMap[preparedPath]);
 
-      case ROUTE_INVITE_NEW_TDR_USER:
-        setTitle(INVITE_NEW_TDR_USER);
-        setFooter(inviteFooter);
-        break;
-
-      default:
-        setTitle(USERS);
-        setFooter(<Tabs onChange={onTabChange} items={tabItems} />);
+    if (
+      preparedPath === ROUTE_INVITE_NEW_PORTAL_USER ||
+      preparedPath === ROUTE_INVITE_NEW_TDR_USER
+    ) {
+      setFooter(inviteFooter);
+    } else if (preparedPath.includes('edit-user-profile')) {
+      setFooter(<div style={{ paddingBottom: 1 }} />);
+    } else if (id && !preparedPath.includes('edit-user-profile')) {
+      // TODO - add last audit log of the selected user
+      setFooter(
+        <div style={{ paddingBottom: 16 }}>
+          <Space>
+            <Badge color={NEUTRAL_5} />
+            <span>Logged out</span>
+          </Space>
+        </div>,
+      );
+    } else {
+      setFooter(<Tabs onChange={onTabChange} items={tabItems} />);
     }
-  }, [router, onTabChange]);
+  }, [id, pathname, breadcrumbNameMap, onTabChange]);
 
   const onClickResetPassword = () => {
     setOpenResetPasswordModal(true);
@@ -159,6 +193,7 @@ const UsersPageHeader: React.FC = () => {
       setLoading(true);
 
       const response = await User.archiveUserProfile(+id);
+      getSelectedUser();
     } catch (err: any) {
       console.error(err);
       showErrorNotification(err);
@@ -175,7 +210,6 @@ const UsersPageHeader: React.FC = () => {
   const archiveUserModalProps = {
     loading,
     open: openArchiveUserModal,
-    userType: UserType.Portal,
     onArchive: onArchiveUserProfile,
     onCancel: onCancelArchiveUser,
   };
@@ -187,6 +221,7 @@ const UsersPageHeader: React.FC = () => {
       setLoading(true);
 
       const response = await User.toggleUserProfileLock(+id);
+      getSelectedUser();
     } catch (err: any) {
       console.error(err);
       showErrorNotification(err);
@@ -203,16 +238,19 @@ const UsersPageHeader: React.FC = () => {
   const toggleUserProfileLockModalProps = {
     loading,
     open: openToggleUserProfileLockModal,
-    actionType: UserProfileLockType.LOCK,
     onSubmit: onToggleUserProfileLock,
     onCancel: onCancelUserProfileLock,
   };
 
   return (
-    <PageHeader
+    <PageHeaderAntd
       className="site-page-header-responsive"
       style={{ padding: 0, marginTop: 6 }}
-      onBack={title === USERS ? onBackArrowClick : undefined}
+      onBack={
+        title === INVITE_NEW_PORTAL_USER || title === INVITE_NEW_TDR_USER
+          ? undefined
+          : onBackArrowClick
+      }
       title={title}
       footer={footer}
       extra={
@@ -227,7 +265,7 @@ const UsersPageHeader: React.FC = () => {
           <Dropdown
             key="2"
             menu={{
-              items: dropdownItems,
+              items: getDrowdownItems(selectedUser?.locked),
               onClick: onClickDropdownItem,
             }}
             placement="bottomRight"
@@ -246,8 +284,8 @@ const UsersPageHeader: React.FC = () => {
           />,
         ]
       }
-    ></PageHeader>
+    ></PageHeaderAntd>
   );
 };
 
-export default UsersPageHeader;
+export default PageHeader;

@@ -20,6 +20,7 @@ import {
 } from '@/types/payloads/pagination';
 import { FilterValue } from 'antd/lib/table/interface';
 import { columns } from './columns';
+import { UserStatus } from '@/types/entities/IUser';
 
 export interface PortalUserDataType {
   key: number;
