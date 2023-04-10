@@ -2,18 +2,19 @@ import { Breadcrumb as BreadcrumbAntd } from 'antd';
 import React from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { useBreadcrumbContext } from '@/contexts/BreadcrumbProvider';
+import { typeCastQuery } from '@/utils/general';
+import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
 
 const Breadcrumb = () => {
-  const { breadcrumbNameMap } = useBreadcrumbContext();
+  const { breadcrumbNameMap } = usePageHeaderContext();
   const router = useRouter();
   const { id } = router.query;
 
   const pathSnippets = router.pathname.split('/').filter((i: any) => i);
 
   const breadcrumbItems = pathSnippets.map((_, index: number) => {
-    if (pathSnippets[index] === '[id]' && typeof id === 'string') {
-      pathSnippets[index] = id;
+    if (pathSnippets[index] === '[id]') {
+      pathSnippets[index] = typeCastQuery(id);
     }
 
     const url = `/${pathSnippets.slice(0, index + 1).join('/')}`;

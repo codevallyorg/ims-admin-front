@@ -18,10 +18,11 @@ import styles from './Sider.module.css';
 import { PRIMARY_BLUE } from '@/utils/colors';
 import Header from '@/components/ui/header/Header';
 import Breadcrumb from '@/components/ui/breadcrumb/Breadcrumb';
-import UsersPageHeader from '@/components/pages/components/users-page-header/UsersPageHeader';
 import { useRouter } from 'next/router';
 import { ROUTE_USERS } from '@/utils/constants';
 import { useAuthContext } from '@/contexts/AuthProvider';
+import PageHeader from '@/components/pages/components/page-header/PageHeader';
+import Loader from '@/components/ui/loader/Loader';
 
 const { Content, Sider } = Layout;
 
@@ -97,7 +98,7 @@ const SiderLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   if (!user) {
     if (authLoading) {
-      return <></>;
+      return <Loader />;
     }
     return <>{children}</>;
   }
@@ -141,7 +142,7 @@ const SiderLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div style={{ padding: '16px 24px 0', backgroundColor: '#ffffff' }}>
               <Breadcrumb />
 
-              <UsersPageHeader />
+              <PageHeader />
             </div>
 
             <div

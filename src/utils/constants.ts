@@ -20,6 +20,8 @@ export const ARCHIVED_USERS = 'Archived Users';
 export const INVITE_NEW_PORTAL_USER = 'Invite New Portal User';
 export const INVITE_NEW_TDR_USER = 'Invite New TDR User';
 
+export const EDIT_USER_PROFILE = 'Edit User Profile';
+
 export const LOCK_PROFILE = 'Lock Profile';
 export const UNLOCK_PROFILE = 'Unlock Profile';
 export const ARCHIVE = 'Archive';

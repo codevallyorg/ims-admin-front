@@ -1,6 +1,6 @@
 import SiderLayout from '@/components/layout/sider/Sider';
 import { AuthProvider } from '@/contexts/AuthProvider';
-import { BreadcrumbProvider } from '@/contexts/BreadcrumbProvider';
+import { PageHeaderProvider } from '@/contexts/PageHeaderProvider';
 import '@/styles/globals.css';
 import { poppins } from '@/utils/general';
 // import '@/styles/variables.less';
@@ -10,11 +10,11 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <main id="__next" style={poppins.style}>
       <AuthProvider>
-        <BreadcrumbProvider>
+        <PageHeaderProvider>
           <SiderLayout>
             <Component {...pageProps} />
           </SiderLayout>
-        </BreadcrumbProvider>
+        </PageHeaderProvider>
       </AuthProvider>
     </main>
   );

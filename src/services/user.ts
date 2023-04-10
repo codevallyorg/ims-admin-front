@@ -8,11 +8,7 @@ import {
   toggleUserProfileLock,
 } from '@/apis/user';
 import { UserType } from '@/types/entities/IUser';
-import {
-  OrderByEnum,
-  OrderEnum,
-  PaginationOptions,
-} from '@/types/payloads/pagination';
+import { PaginationOptions } from '@/types/payloads/pagination';
 import {
   EditPortalUserPayload,
   InvitePortalUserPayload,
