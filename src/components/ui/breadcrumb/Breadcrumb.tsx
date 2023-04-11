@@ -2,7 +2,7 @@ import { Breadcrumb as BreadcrumbAntd } from 'antd';
 import React from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { typeCastQuery } from '@/utils/general';
+import { typeCastQueryToString } from '@/utils/general';
 import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
 
 const Breadcrumb = () => {
@@ -14,7 +14,7 @@ const Breadcrumb = () => {
 
   const breadcrumbItems = pathSnippets.map((_, index: number) => {
     if (pathSnippets[index] === '[id]') {
-      pathSnippets[index] = typeCastQuery(id);
+      pathSnippets[index] = typeCastQueryToString(id);
     }
 
     const url = `/${pathSnippets.slice(0, index + 1).join('/')}`;

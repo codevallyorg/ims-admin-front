@@ -22,6 +22,7 @@ export type PaginationOptions = {
   filterByType?: UserType;
   filterByStatus?: UserStatus[];
   filterByRole?: number;
+  search?: string;
 };
 
 export type PageMeta = {

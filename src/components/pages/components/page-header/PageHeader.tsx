@@ -30,7 +30,7 @@ import User from '@/services/user';
 import {
   preparePathname,
   showErrorNotification,
-  typeCastQuery,
+  typeCastQueryToString,
 } from '@/utils/general';
 import ArchiveUserProfileModal from '../../modals/archive-user-profile/ArchiveUserProfileModal';
 import ToggleUserProfileLockModal from '../../modals/toggle-user-profile-lock/ToggleUserProfileLockModal';
@@ -146,7 +146,7 @@ const PageHeader: React.FC = () => {
 
   const onClickEdit = () => {
     const preparedRoute = router.pathname
-      .replace('[id]', typeCastQuery(router.query.id))
+      .replace('[id]', typeCastQueryToString(router.query.id))
       .concat('/edit-user-profile');
 
     router.push(preparedRoute);

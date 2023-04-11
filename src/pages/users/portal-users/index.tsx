@@ -11,7 +11,7 @@ import {
 } from '@/utils/constants';
 import styles from './PortalUsers.module.css';
 import User from '@/services/user';
-import { typeCastQuery } from '@/utils/general';
+import { typeCastQueryToString } from '@/utils/general';
 import {
   OrderByEnum,
   OrderEnum,
@@ -19,8 +19,8 @@ import {
   PaginationOptions,
 } from '@/types/payloads/pagination';
 import { FilterValue } from 'antd/lib/table/interface';
-import { columns } from './columns';
-import { UserStatus } from '@/types/entities/IUser';
+import { getColumns } from './columns';
+import { UserStatus, UserType } from '@/types/entities/IUser';
 
 export interface PortalUserDataType {
   key: number;
@@ -42,19 +42,18 @@ const PortalUsers: FC = () => {
 
   // handle route query page defect
   useEffect(() => {
-    const { page: curPage, orderBy } = router.query;
+    const { page, filterByType } = router.query;
 
     const queryProps: PaginationOptions = {};
 
-    if (curPage && orderBy) return;
+    if (page && filterByType) return;
 
-    if (!curPage) {
+    if (!page) {
       queryProps.page = 1;
     }
 
-    if (!orderBy) {
-      queryProps.orderBy = OrderByEnum.updatedAt;
-      queryProps.order = OrderEnum.desc;
+    if (!filterByType) {
+      queryProps.filterByType = UserType.Portal;
     }
 
     router.replace({ query: { ...router.query, ...queryProps } });
@@ -74,6 +73,8 @@ const PortalUsers: FC = () => {
           user.key = user.id;
         }
 
+        console.log(users);
+
         setUsers(users);
         setPageMeta(meta);
       } catch (err: any) {
@@ -87,7 +88,7 @@ const PortalUsers: FC = () => {
   }, [router.query]);
 
   useEffect(() => {
-    let possibleTotalUsers = +typeCastQuery(router.query.page) * 10;
+    let possibleTotalUsers = +typeCastQueryToString(router.query.page) * 10;
 
     if (pageMeta?.hasNextPage) {
       possibleTotalUsers += 10;
@@ -144,7 +145,7 @@ const PortalUsers: FC = () => {
     }
   };
 
-  const tableActionsHandler = (
+  const columnActionsHandler = (
     pagination: TablePaginationConfig,
     filters: Record<string, FilterValue | null>,
     sorts: any,
@@ -154,6 +155,16 @@ const PortalUsers: FC = () => {
     applyPagination(pagination, paginationOptions);
     applySorts(sorts, paginationOptions);
 
+    if (filters.status === null) {
+      paginationOptions.filterByStatus = undefined;
+    } else {
+      const filterValues = filters.status.map((value) =>
+        value === UserStatus.Invited ? UserStatus.Invited : UserStatus.LoggedIn,
+      );
+
+      paginationOptions.filterByStatus = filterValues;
+    }
+
     router.replace({
       query: {
         ...router.query,
@@ -162,13 +173,19 @@ const PortalUsers: FC = () => {
     });
   };
 
+  const onSearch = (search: string) => {
+    router.replace({ query: { ...router.query, search } });
+  };
+
   return (
     <Table
       name="Portal Users"
       viewButtonLabel="View Report"
       inviteButtonLabel="Invite new Portal User"
       onClickInvite={onClickInvite}
-      columns={columns}
+      onSearch={onSearch}
+      defaultSearchText={typeCastQueryToString(router.query.search)}
+      columns={getColumns(router)}
       dataSource={users}
       rowSelection={{
         type: 'checkbox',
@@ -176,14 +193,14 @@ const PortalUsers: FC = () => {
       }}
       loading={loading}
       rowClassName={styles.row}
-      onChange={tableActionsHandler}
-      selectedRoleKey={typeCastQuery(router.query.filterByRole)}
+      onChange={columnActionsHandler}
+      selectedRoleKey={typeCastQueryToString(router.query.filterByRole)}
       onSelectRole={onSelectRole}
       pagination={{
         responsive: true,
         hideOnSinglePage:
           pageMeta?.page === 1 && pageMeta.hasNextPage === false,
-        current: +typeCastQuery(router.query.page) || 1,
+        current: +typeCastQueryToString(router.query.page) || 1,
         total: possibleTotalUsers,
       }}
       onRow={({ id }) => {

@@ -19,7 +19,9 @@ export const endpointUrl = (url: string | undefined) => {
   return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/${url}`;
 };
 
-export const typeCastQuery = (query?: string | string[] | number): string => {
+export const typeCastQueryToString = (
+  query?: string | string[] | number,
+): string => {
   return typeof query === 'string' || typeof query === 'number'
     ? `${query}`
     : '';
@@ -29,7 +31,7 @@ export const preparePathname = (
   pathname: string,
   id: string | string[] | number,
 ) => {
-  return pathname.replace('[id]', typeCastQuery(id));
+  return pathname.replace('[id]', typeCastQueryToString(id));
 };
 
 export const showNotification = (notificationData: NotificationProps) => {
@@ -65,6 +67,7 @@ export const getPaginatedUrl = (
     filterByType,
     filterByStatus,
     filterByRole,
+    search,
   } = paginationOptions;
 
   if (page) {
@@ -99,6 +102,10 @@ export const getPaginatedUrl = (
     paginatedEndpoint = paginatedEndpoint.concat(
       `filterByRole=${filterByRole}&`,
     );
+  }
+
+  if (search) {
+    paginatedEndpoint = paginatedEndpoint.concat(`search=${search}`);
   }
 
   return endpointUrl(`${url}?${paginatedEndpoint}`);

@@ -15,10 +15,11 @@ export type TableToolbarProps = {
   viewButtonLabel?: string;
   inviteButtonLabel?: string;
   selectedRoleKey?: string;
+  defaultSearchText?: string;
   onSelectRole?: MenuClickEventHandler;
   onClickView?: () => void;
   onClickInvite?: () => void;
-  onSearch?: () => void;
+  onSearch?: (value: string) => void;
 };
 
 const TableToolbar: FC<TableToolbarProps> = ({
@@ -26,6 +27,7 @@ const TableToolbar: FC<TableToolbarProps> = ({
   viewButtonLabel,
   inviteButtonLabel,
   selectedRoleKey,
+  defaultSearchText,
   onSelectRole,
   onClickView,
   onClickInvite,
@@ -74,6 +76,7 @@ const TableToolbar: FC<TableToolbarProps> = ({
 
         <Search
           placeholder="input search text"
+          defaultValue={defaultSearchText}
           allowClear
           onSearch={onSearch}
           className={styles.searchBar}

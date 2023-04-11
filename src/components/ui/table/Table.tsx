@@ -11,9 +11,11 @@ const Table: FC<CustomTableProps> = ({
   viewButtonLabel,
   inviteButtonLabel,
   selectedRoleKey,
+  defaultSearchText,
   onSelectRole,
   onClickView,
   onClickInvite,
+  onSearch,
   ...tableProps
 }) => {
   const toolbarProps = {
@@ -21,9 +23,11 @@ const Table: FC<CustomTableProps> = ({
     viewButtonLabel,
     inviteButtonLabel,
     selectedRoleKey,
+    defaultSearchText,
     onSelectRole,
     onClickView,
     onClickInvite,
+    onSearch,
   };
 
   return (
