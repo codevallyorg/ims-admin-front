@@ -11,10 +11,13 @@ import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import {
   ARCHIVE,
   ARCHIVED_USERS,
+  ASSIGNED_AGENTS,
+  CARD_STOCK,
   INVITE_NEW_PORTAL_USER,
   INVITE_NEW_TDR_USER,
   LOCK_PROFILE,
   PORTAL_USERS,
+  PROFILE,
   ROUTE_DASHBOARD_ARCHIVED_USERS,
   ROUTE_DASHBOARD_PORTAL_USERS,
   ROUTE_DASHBOARD_TDR_USERS,
@@ -38,10 +41,16 @@ import ResetPasswordModal from '../../modals/reset-password/ResetPasswordModal';
 import { NEUTRAL_5 } from '@/utils/colors';
 import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
 
-const tabItems = [
+const usersTabItems = [
   { label: PORTAL_USERS, key: PORTAL_USERS },
   { label: TDR_USERS, key: TDR_USERS },
   { label: ARCHIVED_USERS, key: ARCHIVED_USERS },
+];
+
+const tdrUserTabItems = [
+  { label: PROFILE, key: PROFILE },
+  { label: ASSIGNED_AGENTS, key: ASSIGNED_AGENTS },
+  { label: CARD_STOCK, key: CARD_STOCK },
 ];
 
 const getDrowdownItems = (lokedUser?: boolean) => {
@@ -91,7 +100,7 @@ const PageHeader: React.FC = () => {
     router.push(url);
   };
 
-  const onTabChange = useCallback(
+  const onUsersTabChange = useCallback(
     (activeKey: string) => {
       switch (activeKey) {
         case PORTAL_USERS:
@@ -113,6 +122,25 @@ const PageHeader: React.FC = () => {
     [router],
   );
 
+  const onTDRUserTabChange = useCallback(
+    (activeKey: string) => {
+      switch (activeKey) {
+        case PROFILE:
+          router.replace({ query: { ...router.query, tab: PROFILE } });
+          break;
+
+        case ASSIGNED_AGENTS:
+          router.replace({ query: { ...router.query, tab: ASSIGNED_AGENTS } });
+          break;
+
+        case CARD_STOCK:
+          router.replace({ query: { ...router.query, tab: CARD_STOCK } });
+          break;
+      }
+    },
+    [router],
+  );
+
   useEffect(() => {
     const preparedPath = id ? preparePathname(pathname, id) : pathname;
 
@@ -128,17 +156,25 @@ const PageHeader: React.FC = () => {
     } else if (id && !preparedPath.includes('edit-user-profile')) {
       // TODO - add last audit log of the selected user
       setFooter(
-        <div style={{ paddingBottom: 16 }}>
-          <Space>
-            <Badge color={NEUTRAL_5} />
-            <span>Logged out</span>
-          </Space>
-        </div>,
+        <>
+          <div style={{ paddingBottom: 12 }}>
+            <Space>
+              <Badge color={NEUTRAL_5} />
+              <span>Logged out</span>
+            </Space>
+          </div>
+
+          {preparedPath.includes(ROUTE_DASHBOARD_TDR_USERS) ? (
+            <Tabs onChange={onTDRUserTabChange} items={tdrUserTabItems} />
+          ) : (
+            <div style={{ paddingBottom: 4 }} />
+          )}
+        </>,
       );
     } else {
-      setFooter(<Tabs onChange={onTabChange} items={tabItems} />);
+      setFooter(<Tabs onChange={onUsersTabChange} items={usersTabItems} />);
     }
-  }, [id, pathname, breadcrumbNameMap, onTabChange]);
+  }, [id, pathname, breadcrumbNameMap, onUsersTabChange]);
 
   const onClickResetPassword = () => {
     setOpenResetPasswordModal(true);

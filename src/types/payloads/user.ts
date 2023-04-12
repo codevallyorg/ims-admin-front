@@ -11,3 +11,10 @@ export type EditPortalUserPayload = {
   email?: string;
   roleId?: number;
 };
+
+export type InviteTDRUserPayload = InvitePortalUserPayload & {
+  mobile: number | string;
+  location?: string;
+  nationality?: string;
+  idNumber?: string;
+};

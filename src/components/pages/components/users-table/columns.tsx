@@ -6,9 +6,9 @@ import { NextRouter } from 'next/router';
 
 import { UserStatus } from '@/types/entities/IUser';
 import { NEUTRAL_5, SECONDARY_ORANGE, SECONDARY_RED } from '@/utils/colors';
-import { PortalUserDataType } from '.';
 import { ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
 import { OrderByEnum, OrderEnum } from '@/types/payloads/pagination';
+import { PortalUserDataType } from './UsersTable';
 
 const getTimestampValue = (time: string) => {
   const timestamp = moment(time);
@@ -35,8 +35,12 @@ export const getColumns = (
 ): ColumnsType<PortalUserDataType> => {
   const { orderBy, order, filterByStatus } = router.query;
 
-  const statusFilteredValues =
-    typeof filterByStatus === 'string' ? [filterByStatus] : filterByStatus;
+  let statusFilteredValues;
+
+  if (filterByStatus) {
+    statusFilteredValues =
+      typeof filterByStatus === 'string' ? [filterByStatus] : filterByStatus;
+  }
 
   return [
     {

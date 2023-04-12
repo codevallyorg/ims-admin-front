@@ -1,13 +1,10 @@
 import Private from '@/components/layout/Private';
 import { withLayout } from '@/components/layout/utils';
-import Table from '@/components/ui/table/Table';
 import { NEUTRAL_5, SECONDARY_ORANGE, SECONDARY_RED } from '@/utils/colors';
 import { Badge, Space } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import moment from 'moment';
 import { FC } from 'react';
-
-import styles from './ArchivedUsers.module.css';
 
 interface ArchivedUserDatatype {
   key: number;
@@ -135,18 +132,19 @@ const data: ArchivedUserDatatype[] = [
 
 const ArchivedUsers: FC = () => {
   return (
-    <Table
-      name="Archived Users"
-      viewButtonLabel="View Report"
-      inviteButtonLabel="Invite new Portal User"
-      columns={columns}
-      dataSource={data}
-      rowSelection={{
-        type: 'checkbox',
-        // onChange: selectRowHandler,
-      }}
-      rowClassName={styles.row}
-    />
+    // <Table
+    //   name="Archived Users"
+    //   viewButtonLabel="View Report"
+    //   inviteButtonLabel="Invite new Portal User"
+    //   columns={columns}
+    //   dataSource={data}
+    //   rowSelection={{
+    //     type: 'checkbox',
+    //     // onChange: selectRowHandler,
+    //   }}
+    //   rowClassName={styles.row}
+    // />
+    <></>
   );
 };
 
