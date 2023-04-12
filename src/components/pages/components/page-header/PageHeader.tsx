@@ -26,7 +26,11 @@ import {
   TDR_USERS,
   UNLOCK_PROFILE,
 } from '@/utils/constants';
-import { EllipsisOutlined, UserDeleteOutlined } from '@ant-design/icons';
+import {
+  EllipsisOutlined,
+  LockOutlined,
+  UserDeleteOutlined,
+} from '@ant-design/icons';
 import Button from '@/components/ui/button/Button';
 import styles from './PageHeader.module.css';
 import User from '@/services/user';
@@ -90,7 +94,7 @@ const PageHeader: React.FC = () => {
     usePageHeaderContext();
   const router = useRouter();
   const { pathname } = router;
-  const { id } = router.query;
+  const { id, tab } = router.query;
 
   const onBackArrowClick = () => {
     const preparedPath = !id ? pathname : preparePathname(pathname, id);
@@ -145,6 +149,15 @@ const PageHeader: React.FC = () => {
   useEffect(() => {
     const preparedPath = id ? preparePathname(pathname, id) : pathname;
 
+    const defaultUsersTab =
+      pathname === ROUTE_DASHBOARD_PORTAL_USERS
+        ? PORTAL_USERS
+        : pathname === ROUTE_DASHBOARD_TDR_USERS
+        ? TDR_USERS
+        : ARCHIVED_USERS;
+
+    const defaultTDRUserTab = typeCastQueryToString(tab) || PROFILE;
+
     setTitle(breadcrumbNameMap[preparedPath]);
 
     if (
@@ -166,16 +179,33 @@ const PageHeader: React.FC = () => {
           </div>
 
           {preparedPath.includes(ROUTE_DASHBOARD_TDR_USERS) ? (
-            <Tabs onChange={onTDRUserTabChange} items={tdrUserTabItems} />
+            <Tabs
+              defaultActiveKey={defaultTDRUserTab}
+              onChange={onTDRUserTabChange}
+              items={tdrUserTabItems}
+            />
           ) : (
             <div style={{ paddingBottom: 4 }} />
           )}
         </>,
       );
     } else {
-      setFooter(<Tabs onChange={onUsersTabChange} items={usersTabItems} />);
+      setFooter(
+        <Tabs
+          defaultActiveKey={defaultUsersTab}
+          onChange={onUsersTabChange}
+          items={usersTabItems}
+        />,
+      );
     }
-  }, [id, pathname, breadcrumbNameMap, onUsersTabChange, onTDRUserTabChange]);
+  }, [
+    id,
+    pathname,
+    tab,
+    breadcrumbNameMap,
+    onUsersTabChange,
+    onTDRUserTabChange,
+  ]);
 
   const onClickResetPassword = () => {
     setOpenResetPasswordModal(true);
@@ -268,7 +298,18 @@ const PageHeader: React.FC = () => {
 
       setLoading(true);
 
-      const response = await User.toggleUserProfileLock(+id);
+      const updatedUser = await User.toggleUserProfileLock(+id);
+
+      showNotification({
+        message: `Profile ${
+          updatedUser.locked ? 'Locked' : 'Unlocked'
+        } Successfully`,
+        description: `${selectedUser?.firstName} ${
+          selectedUser?.lastName
+        }'s profile has been ${updatedUser.locked ? 'locked!' : 'unlocked!'}`,
+        icon: <LockOutlined style={{ color: PRIMARY_BLUE }} />,
+      });
+
       getSelectedUser();
     } catch (err: any) {
       console.error(err);

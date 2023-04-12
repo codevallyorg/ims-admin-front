@@ -4,9 +4,12 @@ import moment from 'moment';
 import Link from 'next/link';
 import { NextRouter } from 'next/router';
 
-import { UserStatus } from '@/types/entities/IUser';
+import { UserStatus, UserType } from '@/types/entities/IUser';
 import { NEUTRAL_5, SECONDARY_ORANGE, SECONDARY_RED } from '@/utils/colors';
-import { ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
+import {
+  ROUTE_DASHBOARD_PORTAL_USERS,
+  ROUTE_DASHBOARD_TDR_USERS,
+} from '@/utils/constants';
 import { OrderByEnum, OrderEnum } from '@/types/payloads/pagination';
 import { PortalUserDataType } from './UsersTable';
 
@@ -33,7 +36,12 @@ const getTimestampValue = (time: string) => {
 export const getColumns = (
   router: NextRouter,
 ): ColumnsType<PortalUserDataType> => {
-  const { orderBy, order, filterByStatus } = router.query;
+  const { orderBy, order, filterByStatus, filterByType } = router.query;
+
+  const dashboardUrl =
+    filterByType === UserType.Portal
+      ? ROUTE_DASHBOARD_PORTAL_USERS
+      : ROUTE_DASHBOARD_TDR_USERS;
 
   let statusFilteredValues;
 
@@ -113,7 +121,7 @@ export const getColumns = (
       key: 'action',
       render: (_, { key }) => (
         <Link
-          href={`${ROUTE_DASHBOARD_PORTAL_USERS}/${key}/edit-user-profile`}
+          href={`${dashboardUrl}/${key}/edit-user-profile`}
           onClick={(e) => e.stopPropagation()}
         >
           Edit
