@@ -2,15 +2,18 @@ import { PaginationOptions } from '@/types/payloads/pagination';
 import {
   EditPortalUserPayload,
   InvitePortalUserPayload,
+  InviteTDRUserPayload,
 } from '@/types/payloads/user';
 import { endpointUrl, getPaginatedUrl } from '@/utils/general';
 import axiosInstance from './axios';
 
-export const invitePortalUser = (payload: InvitePortalUserPayload) => {
+export const inviteNewUser = (
+  payload: InvitePortalUserPayload | InviteTDRUserPayload,
+) => {
   return axiosInstance.post(endpointUrl('users'), payload);
 };
 
-export const getAllPortalUsers = (pageOptions: PaginationOptions) => {
+export const getAllUsers = (pageOptions: PaginationOptions) => {
   return axiosInstance.get(getPaginatedUrl(`users`, pageOptions));
 };
 

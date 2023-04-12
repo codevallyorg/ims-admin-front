@@ -28,6 +28,7 @@ export type IUser = {
 
 type ITDRProfile = {
   id: number;
+  mobile?: string;
   location?: string;
   nationality?: string;
   idNumber?: string;

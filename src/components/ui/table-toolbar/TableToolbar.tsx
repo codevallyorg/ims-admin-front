@@ -7,8 +7,8 @@ import { FC, useEffect, useState } from 'react';
 import { SECONDARY_BLUE } from '@/utils/colors';
 import Role from '@/services/role';
 import { DownOutlined, PlusOutlined } from '@ant-design/icons';
-import Button from '../button/Button';
 import styles from './TableToolbar.module.css';
+import Button from '@/components/ui/button/Button';
 
 export type TableToolbarProps = {
   name: string;

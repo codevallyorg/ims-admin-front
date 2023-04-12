@@ -25,3 +25,7 @@ export const EDIT_USER_PROFILE = 'Edit User Profile';
 export const LOCK_PROFILE = 'Lock Profile';
 export const UNLOCK_PROFILE = 'Unlock Profile';
 export const ARCHIVE = 'Archive';
+
+export const PROFILE = 'Profile';
+export const ASSIGNED_AGENTS = 'Assigned Agents';
+export const CARD_STOCK = 'Card Stock';

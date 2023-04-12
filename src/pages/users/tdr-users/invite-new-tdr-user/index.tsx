@@ -1,36 +1,48 @@
 import { FC, useState } from 'react';
 
-import { InvitePortalUserPayload } from '@/types/payloads/user';
+import { InviteTDRUserPayload } from '@/types/payloads/user';
 import User from '@/services/user';
 import { useRouter } from 'next/router';
-import { ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
 import { withLayout } from '@/components/layout/utils';
 import Private from '@/components/layout/Private';
-import PortalUserForm from '@/components/pages/forms/portal-user/PortalUserForm';
 import { UserAddOutlined } from '@ant-design/icons';
 import { PRIMARY_BLUE } from '@/utils/colors';
 import { showErrorNotification, showNotification } from '@/utils/general';
+import TDRUserForm from '@/components/pages/forms/tdr-user/TDRUserForm';
 import { UserType } from '@/types/entities/IUser';
+import { ROUTE_DASHBOARD_TDR_USERS } from '@/utils/constants';
 
-const InviteNewPortalUser: FC = () => {
+export interface TDRUserDataType {
+  key: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  roleName: string;
+  status: string;
+  updatedAt: string;
+}
+
+const InviteNewTDRUser: FC = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const router = useRouter();
 
-  const onSubmit = async (data: InvitePortalUserPayload) => {
+  const onSubmit = async (data: InviteTDRUserPayload) => {
     try {
       setSubmitting(true);
 
       // TO DELETE
       // @ts-ignore
-      data.type = UserType.Portal;
+      data.type = UserType.TDR;
 
-      await User.inviteNewUser(data);
+      data.mobile = `${data.mobile}`;
 
-      router.push(ROUTE_DASHBOARD_PORTAL_USERS);
+      const newUser = await User.inviteNewUser(data);
+
+      router.push(`${ROUTE_DASHBOARD_TDR_USERS}/${newUser.id}`);
 
       showNotification({
-        message: 'New Portal User Invite Sent',
+        message: 'New TDR User Invite Sent',
         description: `An invite has been sent to ${data.firstName} ${data.lastName}.`,
         icon: <UserAddOutlined style={{ color: PRIMARY_BLUE }} />,
       });
@@ -42,7 +54,7 @@ const InviteNewPortalUser: FC = () => {
     }
   };
 
-  return <PortalUserForm loading={submitting} onSubmit={onSubmit} />;
+  return <TDRUserForm loading={submitting} onSubmit={onSubmit} />;
 };
 
-export default withLayout(InviteNewPortalUser, Private);
+export default withLayout(InviteNewTDRUser, Private);

@@ -1,29 +1,29 @@
 import {
   archiveUserProfile,
   editPortalUser,
-  getAllPortalUsers,
+  getAllUsers,
   getUser,
-  invitePortalUser,
+  inviteNewUser,
   resetPassword,
   toggleUserProfileLock,
 } from '@/apis/user';
-import { UserType } from '@/types/entities/IUser';
 import { PaginationOptions } from '@/types/payloads/pagination';
 import {
   EditPortalUserPayload,
   InvitePortalUserPayload,
+  InviteTDRUserPayload,
 } from '@/types/payloads/user';
 
 export default class User {
-  static async invitePortalUser(payload: InvitePortalUserPayload) {
-    const { data } = await invitePortalUser(payload);
+  static async inviteNewUser(
+    payload: InvitePortalUserPayload | InviteTDRUserPayload,
+  ) {
+    const { data } = await inviteNewUser(payload);
     return data;
   }
 
-  static async getAllPortalUsers(paginationOptions: PaginationOptions) {
-    paginationOptions.filterByType = UserType.Portal;
-
-    const { data } = await getAllPortalUsers(paginationOptions);
+  static async getAllUsers(paginationOptions: PaginationOptions) {
+    const { data } = await getAllUsers(paginationOptions);
     return data;
   }
 
