@@ -1,6 +1,6 @@
 import {
   archiveUserProfile,
-  editPortalUser,
+  editUser,
   getAllUsers,
   getUser,
   inviteNewUser,
@@ -10,6 +10,7 @@ import {
 import { PaginationOptions } from '@/types/payloads/pagination';
 import {
   EditPortalUserPayload,
+  EditTDRUserPayload,
   InvitePortalUserPayload,
   InviteTDRUserPayload,
 } from '@/types/payloads/user';
@@ -32,8 +33,11 @@ export default class User {
     return data;
   }
 
-  static async editPortalUser(id: number, payload: EditPortalUserPayload) {
-    const { data } = await editPortalUser(id, payload);
+  static async editUser(
+    id: number,
+    payload: EditPortalUserPayload | EditTDRUserPayload,
+  ) {
+    const { data } = await editUser(id, payload);
     return data;
   }
 

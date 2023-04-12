@@ -1,6 +1,7 @@
 import { PaginationOptions } from '@/types/payloads/pagination';
 import {
   EditPortalUserPayload,
+  EditTDRUserPayload,
   InvitePortalUserPayload,
   InviteTDRUserPayload,
 } from '@/types/payloads/user';
@@ -21,7 +22,10 @@ export const getUser = (id: number) => {
   return axiosInstance.get(endpointUrl(`users/${id}`));
 };
 
-export const editPortalUser = (id: number, payload: EditPortalUserPayload) => {
+export const editUser = (
+  id: number,
+  payload: EditPortalUserPayload | EditTDRUserPayload,
+) => {
   return axiosInstance.patch(endpointUrl(`users/${id}`), payload);
 };
 
