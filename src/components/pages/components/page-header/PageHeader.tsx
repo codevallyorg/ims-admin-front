@@ -26,19 +26,20 @@ import {
   TDR_USERS,
   UNLOCK_PROFILE,
 } from '@/utils/constants';
-import { EllipsisOutlined } from '@ant-design/icons';
+import { EllipsisOutlined, UserDeleteOutlined } from '@ant-design/icons';
 import Button from '@/components/ui/button/Button';
 import styles from './PageHeader.module.css';
 import User from '@/services/user';
 import {
   preparePathname,
   showErrorNotification,
+  showNotification,
   typeCastQueryToString,
 } from '@/utils/general';
 import ArchiveUserProfileModal from '../../modals/archive-user-profile/ArchiveUserProfileModal';
 import ToggleUserProfileLockModal from '../../modals/toggle-user-profile-lock/ToggleUserProfileLockModal';
 import ResetPasswordModal from '../../modals/reset-password/ResetPasswordModal';
-import { NEUTRAL_5 } from '@/utils/colors';
+import { NEUTRAL_5, PRIMARY_BLUE } from '@/utils/colors';
 import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
 
 const usersTabItems = [
@@ -174,7 +175,7 @@ const PageHeader: React.FC = () => {
     } else {
       setFooter(<Tabs onChange={onUsersTabChange} items={usersTabItems} />);
     }
-  }, [id, pathname, breadcrumbNameMap, onUsersTabChange]);
+  }, [id, pathname, breadcrumbNameMap, onUsersTabChange, onTDRUserTabChange]);
 
   const onClickResetPassword = () => {
     setOpenResetPasswordModal(true);
@@ -229,6 +230,17 @@ const PageHeader: React.FC = () => {
       setLoading(true);
 
       const response = await User.archiveUserProfile(+id);
+
+      if (!response.success) {
+        throw new Error('User not Archived');
+      }
+
+      showNotification({
+        message: 'User Archived',
+        description: `${selectedUser?.firstName} ${selectedUser?.lastName}'s profile has been archived!`,
+        icon: <UserDeleteOutlined style={{ color: PRIMARY_BLUE }} />,
+      });
+
       getSelectedUser();
     } catch (err: any) {
       console.error(err);

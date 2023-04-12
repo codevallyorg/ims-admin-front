@@ -48,7 +48,7 @@ export default class User {
 
   static async archiveUserProfile(id: number) {
     const { data } = await archiveUserProfile(id);
-    return data;
+    return data.data;
   }
 
   static async toggleUserProfileLock(id: number) {
