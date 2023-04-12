@@ -5,8 +5,8 @@ import { withLayout } from '@/components/layout/utils';
 import EditUserProfile from '@/components/pages/components/edit-user-profile/EditUserProfile';
 import { UserType } from '@/types/entities/IUser';
 
-const EditPortalUserProfile: FC = () => {
-  return <EditUserProfile userType={UserType.Portal} />;
+const EditTDRUserProfile: FC = () => {
+  return <EditUserProfile userType={UserType.TDR} />;
 };
 
-export default withLayout(EditPortalUserProfile, Private);
+export default withLayout(EditTDRUserProfile, Private);
