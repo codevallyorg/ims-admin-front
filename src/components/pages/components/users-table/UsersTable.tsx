@@ -1,6 +1,6 @@
 import { FilterValue, TablePaginationConfig } from 'antd/lib/table/interface';
 import { useRouter } from 'next/router';
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { Table } from 'antd';
 
 import User from '@/services/user';
@@ -12,6 +12,7 @@ import {
   PaginationOptions,
 } from '@/types/payloads/pagination';
 import {
+  ARCHIVED_USERS,
   INVITE_NEW_PORTAL_USER,
   INVITE_NEW_TDR_USER,
   PORTAL_USERS,
@@ -62,25 +63,27 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
 
   const router = useRouter();
 
+  const isArchivedDashboard = userType === UserType.Archived;
+
   // handle route query page defect
   useEffect(() => {
     const { page, filterByType } = router.query;
 
     const queryProps: PaginationOptions = {};
 
-    if (page && filterByType) return;
+    if (page && (filterByType || isArchivedDashboard)) return;
 
     if (!page) {
       queryProps.page = 1;
     }
 
-    if (!filterByType) {
+    if (!filterByType && !isArchivedDashboard) {
       queryProps.filterByType =
         userType === UserType.Portal ? UserType.Portal : UserType.TDR;
     }
 
     router.replace({ query: { ...router.query, ...queryProps } });
-  }, [router, userType]);
+  }, [router, isArchivedDashboard, userType]);
 
   useEffect(() => {
     const loadAllUsers = async () => {
@@ -89,11 +92,14 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
 
         const { page, filterByType } = router.query;
 
-        if (!page || !filterByType) {
+        if (!page || (!isArchivedDashboard && !filterByType)) {
           return;
         }
 
-        const { data: users, meta } = await User.getAllUsers(router.query);
+        const { data: users, meta } = await User.getAllUsers(
+          router.query,
+          isArchivedDashboard,
+        );
 
         // TO DELETE
         for (const user of users) {
@@ -110,7 +116,7 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     };
 
     loadAllUsers();
-  }, [router]);
+  }, [router, isArchivedDashboard]);
 
   useEffect(() => {
     let possibleTotalUsers = +typeCastQueryToString(router.query.page) * 10;
@@ -131,17 +137,20 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     router.push(url);
   };
 
-  const onSelectRole = (props: any) => {
-    const { filterByRole } = router.query;
+  const onSelectRoleItem = useCallback(
+    (props: any) => {
+      const { filterByRole } = router.query;
 
-    let roleKey = undefined;
+      let roleKey = undefined;
 
-    if (filterByRole !== props.key) {
-      roleKey = props.key;
-    }
+      if (filterByRole !== props.key) {
+        roleKey = props.key;
+      }
 
-    router.replace({ query: { ...router.query, filterByRole: roleKey } });
-  };
+      router.replace({ query: { ...router.query, filterByRole: roleKey } });
+    },
+    [router],
+  );
 
   const applyPagination = (
     pagination: TablePaginationConfig,
@@ -214,13 +223,35 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     router.replace({ query: { ...router.query, search } });
   };
 
+  let [viewButtonLabel, onSelectRole]: [
+    undefined | string,
+    undefined | ((props: any) => void),
+  ] = ['View Report', onSelectRoleItem];
+  let name, inviteButtonLabel;
+
+  switch (userType) {
+    case UserType.Portal:
+      name = PORTAL_USERS;
+      inviteButtonLabel = INVITE_NEW_PORTAL_USER;
+      break;
+
+    case UserType.TDR:
+      name = TDR_USERS;
+      inviteButtonLabel = INVITE_NEW_TDR_USER;
+      break;
+
+    case UserType.Archived:
+      name = ARCHIVED_USERS;
+      viewButtonLabel = undefined;
+      inviteButtonLabel = undefined;
+      onSelectRole = undefined;
+      break;
+  }
+
   const toolbarProps: TableToolbarProps = {
-    name: userType === UserType.Portal ? PORTAL_USERS : TDR_USERS,
-    viewButtonLabel: 'View Report',
-    inviteButtonLabel:
-      userType === UserType.Portal
-        ? INVITE_NEW_PORTAL_USER
-        : INVITE_NEW_TDR_USER,
+    name,
+    viewButtonLabel,
+    inviteButtonLabel,
     selectedRoleKey: typeCastQueryToString(router.query.filterByRole),
     defaultSearchText: typeCastQueryToString(router.query.search),
     onSelectRole,
@@ -233,12 +264,9 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
       <TableToolbar {...toolbarProps} />
 
       <Table
-        columns={getColumns(router)}
+        columns={getColumns(router, isArchivedDashboard)}
         dataSource={users}
-        rowSelection={{
-          type: 'checkbox',
-          // onChange: selectRowHandler,
-        }}
+        rowSelection={isArchivedDashboard ? undefined : {}}
         loading={loading}
         rowClassName={styles.row}
         onChange={columnActionsHandler}

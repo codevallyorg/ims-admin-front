@@ -23,8 +23,11 @@ export default class User {
     return data;
   }
 
-  static async getAllUsers(paginationOptions: PaginationOptions) {
-    const { data } = await getAllUsers(paginationOptions);
+  static async getAllUsers(
+    paginationOptions: PaginationOptions,
+    archived: boolean,
+  ) {
+    const { data } = await getAllUsers(paginationOptions, archived);
     return data;
   }
 
