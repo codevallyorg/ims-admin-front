@@ -43,7 +43,7 @@ export default class User {
 
   static async resetPassword(id: number) {
     const { data } = await resetPassword(id);
-    return data;
+    return data.data;
   }
 
   static async archiveUserProfile(id: number) {

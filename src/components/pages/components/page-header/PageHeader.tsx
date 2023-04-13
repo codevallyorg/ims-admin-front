@@ -29,6 +29,7 @@ import {
 import {
   EllipsisOutlined,
   LockOutlined,
+  MailOutlined,
   UnlockOutlined,
   UserDeleteOutlined,
 } from '@ant-design/icons';
@@ -151,11 +152,11 @@ const PageHeader: React.FC = () => {
     const preparedPath = id ? preparePathname(pathname, id) : pathname;
 
     const defaultUsersTab =
-      pathname === ROUTE_DASHBOARD_PORTAL_USERS
-        ? PORTAL_USERS
+      pathname === ROUTE_DASHBOARD_ARCHIVED_USERS
+        ? ARCHIVED_USERS
         : pathname === ROUTE_DASHBOARD_TDR_USERS
         ? TDR_USERS
-        : ARCHIVED_USERS;
+        : PORTAL_USERS;
 
     const defaultTDRUserTab = typeCastQueryToString(tab) || PROFILE;
 
@@ -227,6 +228,16 @@ const PageHeader: React.FC = () => {
       setLoading(true);
 
       const response = await User.resetPassword(+id);
+
+      if (!response.success) {
+        throw new Error('Something went wrong');
+      }
+
+      showNotification({
+        message: 'Sent Successfully',
+        description: `A password reset link has been sent to ${selectedUser?.email}`,
+        icon: <MailOutlined style={{ color: PRIMARY_BLUE }} />,
+      });
     } catch (err: any) {
       console.error(err);
     } finally {
