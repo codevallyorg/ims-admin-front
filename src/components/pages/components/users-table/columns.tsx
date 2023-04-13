@@ -1,8 +1,8 @@
 import { ColumnsType } from 'antd/lib/table';
-import { Badge } from 'antd';
+import { Badge, Popconfirm } from 'antd';
 import moment from 'moment';
-import Link from 'next/link';
 import { NextRouter } from 'next/router';
+import { MouseEvent } from 'react';
 
 import { UserStatus, UserType } from '@/types/entities/IUser';
 import { NEUTRAL_5, SECONDARY_ORANGE, SECONDARY_RED } from '@/utils/colors';
@@ -12,6 +12,8 @@ import {
 } from '@/utils/constants';
 import { OrderByEnum, OrderEnum } from '@/types/payloads/pagination';
 import { PortalUserDataType } from './UsersTable';
+
+const popconfirmTitle = 'Are you sure you would like to unachive this profile?';
 
 const getTimestampValue = (time: string) => {
   const timestamp = moment(time);
@@ -35,6 +37,7 @@ const getTimestampValue = (time: string) => {
 
 export const getColumns = (
   router: NextRouter,
+  isArchivedDashboard: boolean,
 ): ColumnsType<PortalUserDataType> => {
   const { orderBy, order, filterByStatus, filterByType } = router.query;
 
@@ -42,6 +45,18 @@ export const getColumns = (
     filterByType === UserType.Portal
       ? ROUTE_DASHBOARD_PORTAL_USERS
       : ROUTE_DASHBOARD_TDR_USERS;
+
+  const onActionClickHandler = (
+    e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>,
+    key: number,
+  ) => {
+    e.stopPropagation();
+
+    if (!isArchivedDashboard) {
+      router.push(`${dashboardUrl}/${key}/edit-user-profile`);
+      return;
+    }
+  };
 
   let statusFilteredValues;
 
@@ -120,12 +135,15 @@ export const getColumns = (
       title: 'Action',
       key: 'action',
       render: (_, { key }) => (
-        <Link
-          href={`${dashboardUrl}/${key}/edit-user-profile`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          Edit
-        </Link>
+        <a onClick={(e) => onActionClickHandler(e, key)}>
+          {!isArchivedDashboard ? (
+            'Edit'
+          ) : (
+            <Popconfirm title={popconfirmTitle} placement="topRight">
+              Unarchive
+            </Popconfirm>
+          )}
+        </a>
       ),
     },
   ];

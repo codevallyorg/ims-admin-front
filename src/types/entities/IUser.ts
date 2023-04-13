@@ -1,6 +1,7 @@
 export enum UserType {
   Portal = 'Portal',
   TDR = 'TDR',
+  Archived = 'Archived',
 }
 
 export enum UserStatus {

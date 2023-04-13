@@ -49,30 +49,32 @@ const TableToolbar: FC<TableToolbarProps> = ({
       }
     };
 
-    loadRoleOptions();
-  }, []);
+    onSelectRole && loadRoleOptions();
+  }, [onSelectRole]);
 
   return (
     <div className={styles.toolBar}>
       <div style={{ fontSize: 16, fontWeight: 500 }}>{name}</div>
 
       <div className={styles.rightSide}>
-        <Dropdown
-          menu={{
-            items: roleOptions,
-            onClick: onSelectRole,
-            selectedKeys: [selectedRoleKey || ''],
-          }}
-          trigger={['click']}
-          className={styles.dropdown}
-        >
-          <Space
-            style={selectedRoleKey ? { color: SECONDARY_BLUE } : undefined}
+        {onSelectRole && (
+          <Dropdown
+            menu={{
+              items: roleOptions,
+              onClick: onSelectRole,
+              selectedKeys: [selectedRoleKey || ''],
+            }}
+            trigger={['click']}
+            className={styles.dropdown}
           >
-            By role
-            <DownOutlined />
-          </Space>
-        </Dropdown>
+            <Space
+              style={selectedRoleKey ? { color: SECONDARY_BLUE } : undefined}
+            >
+              By role
+              <DownOutlined />
+            </Space>
+          </Dropdown>
+        )}
 
         <Search
           placeholder="input search text"

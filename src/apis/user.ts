@@ -14,8 +14,13 @@ export const inviteNewUser = (
   return axiosInstance.post(endpointUrl('users'), payload);
 };
 
-export const getAllUsers = (pageOptions: PaginationOptions) => {
-  return axiosInstance.get(getPaginatedUrl(`users`, pageOptions));
+export const getAllUsers = (
+  pageOptions: PaginationOptions,
+  archived: boolean,
+) => {
+  return axiosInstance.get(
+    getPaginatedUrl(`${archived ? 'users/archived' : 'users'}`, pageOptions),
+  );
 };
 
 export const getUser = (id: number) => {
