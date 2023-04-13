@@ -29,6 +29,7 @@ import {
 import {
   EllipsisOutlined,
   LockOutlined,
+  UnlockOutlined,
   UserDeleteOutlined,
 } from '@ant-design/icons';
 import Button from '@/components/ui/button/Button';
@@ -300,14 +301,22 @@ const PageHeader: React.FC = () => {
 
       const updatedUser = await User.toggleUserProfileLock(+id);
 
+      const message = `Profile ${
+        updatedUser.locked ? 'Locked' : 'Unlocked'
+      } Successfully`;
+      const description = `${selectedUser?.firstName} ${
+        selectedUser?.lastName
+      }'s profile has been ${updatedUser.locked ? 'locked!' : 'unlocked!'}`;
+      const icon = updatedUser.locked ? (
+        <LockOutlined style={{ color: PRIMARY_BLUE }} />
+      ) : (
+        <UnlockOutlined style={{ color: PRIMARY_BLUE }} />
+      );
+
       showNotification({
-        message: `Profile ${
-          updatedUser.locked ? 'Locked' : 'Unlocked'
-        } Successfully`,
-        description: `${selectedUser?.firstName} ${
-          selectedUser?.lastName
-        }'s profile has been ${updatedUser.locked ? 'locked!' : 'unlocked!'}`,
-        icon: <LockOutlined style={{ color: PRIMARY_BLUE }} />,
+        message,
+        description,
+        icon,
       });
 
       getSelectedUser();
