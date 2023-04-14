@@ -38,10 +38,10 @@ export const resetPassword = (id: number) => {
   return axiosInstance.post(endpointUrl(`users/reset-password/${id}`));
 };
 
-export const archiveUserProfile = (id: number) => {
-  return axiosInstance.patch(endpointUrl(`users/archive/${id}`));
-};
-
 export const toggleUserProfileLock = (id: number) => {
   return axiosInstance.patch(endpointUrl(`users/toggle-locked/${id}`));
+};
+
+export const toggleArchiveUserProfile = (id: number) => {
+  return axiosInstance.patch(endpointUrl(`users/toggle-archived/${id}`));
 };

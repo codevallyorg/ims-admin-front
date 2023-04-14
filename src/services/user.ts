@@ -1,10 +1,10 @@
 import {
-  archiveUserProfile,
   editUser,
   getAllUsers,
   getUser,
   inviteNewUser,
   resetPassword,
+  toggleArchiveUserProfile,
   toggleUserProfileLock,
 } from '@/apis/user';
 import { PaginationOptions } from '@/types/payloads/pagination';
@@ -49,13 +49,13 @@ export default class User {
     return data.data;
   }
 
-  static async archiveUserProfile(id: number) {
-    const { data } = await archiveUserProfile(id);
+  static async toggleArchiveUserProfile(id: number) {
+    const { data } = await toggleArchiveUserProfile(id);
     return data.data;
   }
 
   static async toggleUserProfileLock(id: number) {
     const { data } = await toggleUserProfileLock(id);
-    return data;
+    return data.data;
   }
 }

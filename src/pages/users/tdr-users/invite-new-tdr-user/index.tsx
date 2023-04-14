@@ -12,16 +12,6 @@ import TDRUserForm from '@/components/pages/forms/tdr-user/TDRUserForm';
 import { UserType } from '@/types/entities/IUser';
 import { ROUTE_DASHBOARD_TDR_USERS } from '@/utils/constants';
 
-export interface TDRUserDataType {
-  key: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  roleName: string;
-  status: string;
-  updatedAt: string;
-}
-
 const InviteNewTDRUser: FC = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
 
