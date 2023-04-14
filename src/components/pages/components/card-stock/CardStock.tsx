@@ -1,21 +1,16 @@
-import Button from '@/components/ui/button/Button';
-import { ExclamationCircleFilled } from '@ant-design/icons';
 import { Empty } from 'antd';
 import { FC } from 'react';
+import Button from '@/components/ui/button/Button';
+import EmptyText from '@/components/ui/empty-text/EmptyText';
+import Exclamation from '@/icons/Exclamation';
 
 const CardStock: FC = () => {
   return (
     <Empty
-      image={
-        <ExclamationCircleFilled
-
-        //   style={{ height: 120, width: 120 }}
-        />
+      image={<Exclamation />}
+      description={
+        <EmptyText>No Transport card stock has been issued</EmptyText>
       }
-      //   imageStyle={{
-      //     height: 120,
-      //   }}
-      description={<span>No Transport card stock has been issued</span>}
     >
       <Button type="primary">Add Stock</Button>
     </Empty>

@@ -2,18 +2,27 @@ import { ColumnsType } from 'antd/lib/table';
 import { Badge, Popconfirm } from 'antd';
 import moment from 'moment';
 import { NextRouter } from 'next/router';
+import Link from 'next/link';
 import { MouseEvent } from 'react';
 
 import { UserStatus, UserType } from '@/types/entities/IUser';
-import { NEUTRAL_5, SECONDARY_ORANGE, SECONDARY_RED } from '@/utils/colors';
+import {
+  NEUTRAL_5,
+  PRIMARY_RED,
+  SECONDARY_ORANGE,
+  SECONDARY_RED,
+} from '@/utils/colors';
 import {
   ROUTE_DASHBOARD_PORTAL_USERS,
   ROUTE_DASHBOARD_TDR_USERS,
 } from '@/utils/constants';
 import { OrderByEnum, OrderEnum } from '@/types/payloads/pagination';
-import { PortalUserDataType } from './UsersTable';
+import { UserTableDataType } from './UsersTable';
+import { ExclamationCircleFilled } from '@ant-design/icons';
 
 const popconfirmTitle = 'Are you sure you would like to unachive this profile?';
+
+const popconfirmButtonsStyle = { borderRadius: 8 };
 
 const getTimestampValue = (time: string) => {
   const timestamp = moment(time);
@@ -38,7 +47,9 @@ const getTimestampValue = (time: string) => {
 export const getColumns = (
   router: NextRouter,
   isArchivedDashboard: boolean,
-): ColumnsType<PortalUserDataType> => {
+  popconfirmSubmitting: boolean,
+  onUnarchive: (user: UserTableDataType) => void,
+): ColumnsType<UserTableDataType> => {
   const { orderBy, order, filterByStatus, filterByType } = router.query;
 
   const dashboardUrl =
@@ -46,16 +57,10 @@ export const getColumns = (
       ? ROUTE_DASHBOARD_PORTAL_USERS
       : ROUTE_DASHBOARD_TDR_USERS;
 
-  const onActionClickHandler = (
+  const stopPropagation = (
     e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>,
-    key: number,
   ) => {
     e.stopPropagation();
-
-    if (!isArchivedDashboard) {
-      router.push(`${dashboardUrl}/${key}/edit-user-profile`);
-      return;
-    }
   };
 
   let statusFilteredValues;
@@ -134,17 +139,33 @@ export const getColumns = (
     {
       title: 'Action',
       key: 'action',
-      render: (_, { key }) => (
-        <a onClick={(e) => onActionClickHandler(e, key)}>
-          {!isArchivedDashboard ? (
-            'Edit'
-          ) : (
-            <Popconfirm title={popconfirmTitle} placement="topRight">
-              Unarchive
+      render: (_, user) =>
+        !isArchivedDashboard ? (
+          <Link
+            href={`${dashboardUrl}/${user.key}/edit-user-profile`}
+            onClick={stopPropagation}
+          >
+            Edit
+          </Link>
+        ) : (
+          <a onClick={stopPropagation} style={{ display: 'block' }}>
+            <Popconfirm
+              title={popconfirmTitle}
+              placement="topRight"
+              okText="Yes"
+              cancelText="No"
+              okButtonProps={{
+                loading: popconfirmSubmitting,
+                style: popconfirmButtonsStyle,
+              }}
+              cancelButtonProps={{ style: popconfirmButtonsStyle }}
+              onConfirm={onUnarchive.bind(this, user)}
+              icon={<ExclamationCircleFilled style={{ color: PRIMARY_RED }} />}
+            >
+              <div>Unarchive</div>
             </Popconfirm>
-          )}
-        </a>
-      ),
+          </a>
+        ),
     },
   ];
 };

@@ -1,27 +1,30 @@
 import { FC } from 'react';
 
-import { poppins } from '@/utils/general';
-import Button from '@/components/ui/button/Button';
-import styles from './ArchiveUserProfileModal.module.css';
+import styles from './ToggleArchiveUserProfileModal.module.css';
 import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
 import Modal from '@/components/ui/modal/Modal';
+import { ARCHIVE, UNARCHIVE } from '@/utils/constants';
 
-type ArchiveUserProfileModalProps = {
+type ToggleArchiveUserProfileModalProps = {
   open: boolean;
   loading: boolean;
   onCancel: () => void;
   onArchive: () => void;
 };
 
-const modalTitle = <div>Archive User Profile</div>;
-
-const ArchiveUserProfileModal: FC<ArchiveUserProfileModalProps> = ({
+const ToggleArchiveUserProfileModal: FC<ToggleArchiveUserProfileModalProps> = ({
   open,
   loading,
   onCancel,
   onArchive,
 }) => {
   const { selectedUser } = usePageHeaderContext();
+
+  const actionType = selectedUser?.archived ? UNARCHIVE : ARCHIVE;
+
+  const modalTitle = (
+    <div>{selectedUser?.archived ? UNARCHIVE : ARCHIVE} User Profile</div>
+  );
 
   return (
     <Modal
@@ -30,12 +33,13 @@ const ArchiveUserProfileModal: FC<ArchiveUserProfileModalProps> = ({
       onCancel={onCancel}
       loading={loading}
       onSubmit={onArchive}
-      okButtonLabel="Archive"
+      okButtonLabel={actionType}
     >
       <div className={styles.body}>
         <p>
-          You are about to archive {selectedUser?.firstName}{' '}
-          {selectedUser?.lastName}&apos;s {selectedUser?.type} User Profile.
+          You are about to {selectedUser?.archived ? 'unarchive' : 'archive'}{' '}
+          {selectedUser?.firstName} {selectedUser?.lastName}&apos;s{' '}
+          {selectedUser?.type} User Profile.
         </p>
 
         <p>
@@ -49,4 +53,4 @@ const ArchiveUserProfileModal: FC<ArchiveUserProfileModalProps> = ({
   );
 };
 
-export default ArchiveUserProfileModal;
+export default ToggleArchiveUserProfileModal;

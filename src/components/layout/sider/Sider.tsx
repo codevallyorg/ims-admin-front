@@ -152,7 +152,7 @@ const SiderLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 padding: 24,
                 backgroundColor: '#ffffff',
                 // minHeight: 360,
-                minHeight: 300,
+                minHeight: 200,
               }}
             >
               {children}

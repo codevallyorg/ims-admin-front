@@ -1,7 +1,7 @@
 import { FilterValue, TablePaginationConfig } from 'antd/lib/table/interface';
 import { useRouter } from 'next/router';
 import { FC, useCallback, useEffect, useState } from 'react';
-import { Table } from 'antd';
+import { Empty, Table } from 'antd';
 
 import User from '@/services/user';
 import { UserStatus, UserType } from '@/types/entities/IUser';
@@ -22,24 +22,22 @@ import {
   ROUTE_INVITE_NEW_TDR_USER,
   TDR_USERS,
 } from '@/utils/constants';
-import { typeCastQueryToString } from '@/utils/general';
+import {
+  showErrorNotification,
+  showNotification,
+  typeCastQueryToString,
+} from '@/utils/general';
 import TableToolbar, {
   TableToolbarProps,
 } from '../../../ui/table-toolbar/TableToolbar';
 import styles from './UsersTable.module.css';
 import { getColumns } from './columns';
+import { SyncOutlined } from '@ant-design/icons';
+import { PRIMARY_BLUE } from '@/utils/colors';
+import Exclamation from '@/icons/Exclamation';
+import EmptyText from '@/components/ui/empty-text/EmptyText';
 
-export interface PortalUserDataType {
-  key: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  roleName: string;
-  status: string;
-  updatedAt: string;
-}
-
-export interface TDRUserDataType {
+export interface UserTableDataType {
   key: number;
   firstName: string;
   lastName: string;
@@ -55,11 +53,11 @@ type UsersTableProps = {
 
 const UsersTable: FC<UsersTableProps> = ({ userType }) => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [users, setUsers] = useState<PortalUserDataType[] | TDRUserDataType[]>(
-    [],
-  );
+  const [users, setUsers] = useState<UserTableDataType[]>([]);
   const [pageMeta, setPageMeta] = useState<PageMeta>();
   const [possibleTotalUsers, setPossibleTotalUsers] = useState<number>(0);
+  const [popconfirmSubmitting, setPopconfirmSubmitting] =
+    useState<boolean>(false);
 
   const router = useRouter();
 
@@ -85,38 +83,38 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     router.replace({ query: { ...router.query, ...queryProps } });
   }, [router, isArchivedDashboard, userType]);
 
-  useEffect(() => {
-    const loadAllUsers = async () => {
-      try {
-        setLoading(true);
+  const loadAllUsers = useCallback(async () => {
+    try {
+      setLoading(true);
 
-        const { page, filterByType } = router.query;
+      const { page, filterByType } = router.query;
 
-        if (!page || (!isArchivedDashboard && !filterByType)) {
-          return;
-        }
-
-        const { data: users, meta } = await User.getAllUsers(
-          router.query,
-          isArchivedDashboard,
-        );
-
-        // TO DELETE
-        for (const user of users) {
-          user.key = user.id;
-        }
-
-        setUsers(users);
-        setPageMeta(meta);
-      } catch (err: any) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+      if (!page || (!isArchivedDashboard && !filterByType)) {
+        return;
       }
-    };
 
-    loadAllUsers();
+      const { data: users, meta } = await User.getAllUsers(
+        router.query,
+        isArchivedDashboard,
+      );
+
+      // TO DELETE
+      for (const user of users) {
+        user.key = user.id;
+      }
+
+      setUsers(users);
+      setPageMeta(meta);
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, [router, isArchivedDashboard]);
+
+  useEffect(() => {
+    loadAllUsers();
+  }, [loadAllUsers]);
 
   useEffect(() => {
     let possibleTotalUsers = +typeCastQueryToString(router.query.page) * 10;
@@ -223,11 +221,40 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     router.replace({ query: { ...router.query, search } });
   };
 
+  const onUnarchive = async (user: UserTableDataType) => {
+    try {
+      setPopconfirmSubmitting(true);
+
+      const response = await User.toggleArchiveUserProfile(user.key);
+
+      if (!response.success) {
+        throw new Error('Something went wrong');
+      }
+
+      loadAllUsers();
+
+      const message = `User Unarchived Successfully`;
+      const description = `${user.firstName} ${user.lastName}'s profile has been unarchived!`;
+      const icon = <SyncOutlined style={{ color: PRIMARY_BLUE }} />;
+
+      showNotification({
+        message,
+        description,
+        icon,
+      });
+    } catch (err: any) {
+      console.error(err);
+      showErrorNotification(err);
+    } finally {
+      setPopconfirmSubmitting(false);
+    }
+  };
+
+  let name, inviteButtonLabel;
   let [viewButtonLabel, onSelectRole]: [
     undefined | string,
     undefined | ((props: any) => void),
   ] = ['View Report', onSelectRoleItem];
-  let name, inviteButtonLabel;
 
   switch (userType) {
     case UserType.Portal:
@@ -259,12 +286,28 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     onSearch,
   };
 
+  if (users.length === 0) {
+    return (
+      <Empty image={<Exclamation />} description={false}>
+        <EmptyText>
+          No user have been {isArchivedDashboard ? 'archived' : 'registered'}{' '}
+          yet.
+        </EmptyText>
+      </Empty>
+    );
+  }
+
   return (
     <div>
       <TableToolbar {...toolbarProps} />
 
       <Table
-        columns={getColumns(router, isArchivedDashboard)}
+        columns={getColumns(
+          router,
+          isArchivedDashboard,
+          popconfirmSubmitting,
+          onUnarchive,
+        )}
         dataSource={users}
         rowSelection={isArchivedDashboard ? undefined : {}}
         loading={loading}

@@ -24,12 +24,14 @@ import {
   ROUTE_INVITE_NEW_PORTAL_USER,
   ROUTE_INVITE_NEW_TDR_USER,
   TDR_USERS,
+  UNARCHIVE,
   UNLOCK_PROFILE,
 } from '@/utils/constants';
 import {
   EllipsisOutlined,
   LockOutlined,
   MailOutlined,
+  SyncOutlined,
   UnlockOutlined,
   UserDeleteOutlined,
 } from '@ant-design/icons';
@@ -42,11 +44,12 @@ import {
   showNotification,
   typeCastQueryToString,
 } from '@/utils/general';
-import ArchiveUserProfileModal from '../../modals/archive-user-profile/ArchiveUserProfileModal';
+import ToggleArchiveUserProfileModal from '../../modals/toggle-archive-user-profile/ToggleArchiveUserProfileModal';
 import ToggleUserProfileLockModal from '../../modals/toggle-user-profile-lock/ToggleUserProfileLockModal';
 import ResetPasswordModal from '../../modals/reset-password/ResetPasswordModal';
 import { NEUTRAL_5, PRIMARY_BLUE } from '@/utils/colors';
 import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
+import { IUser } from '@/types/entities/IUser';
 
 const usersTabItems = [
   { label: PORTAL_USERS, key: PORTAL_USERS },
@@ -60,14 +63,18 @@ const tdrUserTabItems = [
   { label: CARD_STOCK, key: CARD_STOCK },
 ];
 
-const getDrowdownItems = (lokedUser?: boolean) => {
+const getDrowdownItems = (selectedUser: IUser | null) => {
   const items = [
-    { label: LOCK_PROFILE, key: LOCK_PROFILE },
-    { label: ARCHIVE, key: ARCHIVE },
+    { label: LOCK_PROFILE, key: 0 },
+    { label: ARCHIVE, key: 1 },
   ];
 
-  if (lokedUser) {
-    items[0] = { label: UNLOCK_PROFILE, key: UNLOCK_PROFILE };
+  if (selectedUser?.locked) {
+    items[0] = { label: UNLOCK_PROFILE, key: 0 };
+  }
+
+  if (selectedUser?.archived) {
+    items[1] = { label: UNARCHIVE, key: 1 };
   }
 
   return items;
@@ -87,7 +94,7 @@ const PageHeader: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [openResetPasswordModal, setOpenResetPasswordModal] =
     useState<boolean>(false);
-  const [openArchiveUserModal, setOpenArchiveUserModal] =
+  const [openToggleArchiveUserModal, setOpenToggleArchiveUserModal] =
     useState<boolean>(false);
   const [openToggleUserProfileLockModal, setOpenToggleUserProfileLockModal] =
     useState<boolean>(false);
@@ -258,29 +265,43 @@ const PageHeader: React.FC = () => {
   };
 
   const onClickDropdownItem = (info: any) => {
-    if (info.key === ARCHIVE) {
-      setOpenArchiveUserModal(true);
-    } else {
+    if (+info.key === 0) {
       setOpenToggleUserProfileLockModal(true);
+    } else {
+      setOpenToggleArchiveUserModal(true);
     }
   };
 
-  const onArchiveUserProfile = async () => {
+  const onToggleArchiveUserProfile = async () => {
     try {
       if (!id || isNaN(+id)) return;
 
       setLoading(true);
 
-      const response = await User.archiveUserProfile(+id);
+      const response = await User.toggleArchiveUserProfile(+id);
 
       if (!response.success) {
-        throw new Error('User not Archived');
+        throw new Error('Something went wrong');
       }
 
+      const message = `User ${
+        selectedUser?.archived ? 'Unarchived' : 'Archived'
+      } Successfully`;
+      const description = `${selectedUser?.firstName} ${
+        selectedUser?.lastName
+      }'s profile has been ${
+        selectedUser?.archived ? 'unarchived!' : 'archived!'
+      }`;
+      const icon = selectedUser?.archived ? (
+        <SyncOutlined style={{ color: PRIMARY_BLUE }} />
+      ) : (
+        <UserDeleteOutlined style={{ color: PRIMARY_BLUE }} />
+      );
+
       showNotification({
-        message: 'User Archived',
-        description: `${selectedUser?.firstName} ${selectedUser?.lastName}'s profile has been archived!`,
-        icon: <UserDeleteOutlined style={{ color: PRIMARY_BLUE }} />,
+        message,
+        description,
+        icon,
       });
 
       getSelectedUser();
@@ -288,19 +309,19 @@ const PageHeader: React.FC = () => {
       console.error(err);
       showErrorNotification(err);
     } finally {
-      setOpenArchiveUserModal(false);
+      setOpenToggleArchiveUserModal(false);
       setLoading(false);
     }
   };
 
   const onCancelArchiveUser = () => {
-    setOpenArchiveUserModal(false);
+    setOpenToggleArchiveUserModal(false);
   };
 
-  const archiveUserModalProps = {
+  const toggleArchiveUserModalProps = {
     loading,
-    open: openArchiveUserModal,
-    onArchive: onArchiveUserProfile,
+    open: openToggleArchiveUserModal,
+    onArchive: onToggleArchiveUserProfile,
     onCancel: onCancelArchiveUser,
   };
 
@@ -310,18 +331,22 @@ const PageHeader: React.FC = () => {
 
       setLoading(true);
 
-      const updatedUser = await User.toggleUserProfileLock(+id);
+      const response = await User.toggleUserProfileLock(+id);
+
+      if (!response.success) {
+        throw new Error('Something went wrong');
+      }
 
       const message = `Profile ${
-        updatedUser.locked ? 'Locked' : 'Unlocked'
+        selectedUser?.locked ? 'Unlocked' : 'Locked'
       } Successfully`;
       const description = `${selectedUser?.firstName} ${
         selectedUser?.lastName
-      }'s profile has been ${updatedUser.locked ? 'locked!' : 'unlocked!'}`;
-      const icon = updatedUser.locked ? (
-        <LockOutlined style={{ color: PRIMARY_BLUE }} />
-      ) : (
+      }'s profile has been ${selectedUser?.locked ? 'unlocked!' : 'locked!'}`;
+      const icon = selectedUser?.locked ? (
         <UnlockOutlined style={{ color: PRIMARY_BLUE }} />
+      ) : (
+        <LockOutlined style={{ color: PRIMARY_BLUE }} />
       );
 
       showNotification({
@@ -374,7 +399,7 @@ const PageHeader: React.FC = () => {
           <Dropdown
             key="2"
             menu={{
-              items: getDrowdownItems(selectedUser?.locked),
+              items: getDrowdownItems(selectedUser),
               onClick: onClickDropdownItem,
             }}
             placement="bottomRight"
@@ -386,7 +411,10 @@ const PageHeader: React.FC = () => {
             </Button>
           </Dropdown>,
           <ResetPasswordModal key="3" {...resetPasswordModalProps} />,
-          <ArchiveUserProfileModal key="4" {...archiveUserModalProps} />,
+          <ToggleArchiveUserProfileModal
+            key="4"
+            {...toggleArchiveUserModalProps}
+          />,
           <ToggleUserProfileLockModal
             key="5"
             {...toggleUserProfileLockModalProps}
