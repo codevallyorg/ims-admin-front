@@ -1,8 +1,9 @@
-import { PaginationOptions } from '@/types/payloads/pagination';
 import { notification } from 'antd';
 import { IconType } from 'antd/lib/notification';
 import localFont from 'next/font/local';
 import { ReactNode } from 'react';
+import { PaginationOptions } from '@/types/payloads/pagination';
+import { CategorisedActions, IAction } from '@/types/entities/IAction';
 
 type NotificationProps = {
   message: string;
@@ -51,6 +52,41 @@ export const showErrorNotification = (error: any) => {
     message: 'Error',
     description: error.message,
   });
+};
+
+const splitBySpace = (text: string) => {
+  return text
+    .replace(/([A-Z]+)([A-Z][a-z])/g, ' $1 $2')
+    .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+    .replace(/\ +/g, ' ')
+    .trim();
+};
+
+export const getCategorisedActions = (
+  actions: IAction[],
+): CategorisedActions => {
+  const categorisedActions: any = {};
+
+  for (const action of actions) {
+    const { category: categoryCamelCase, subject: subjectCamelCase } = action;
+    const [category, subject] = [
+      splitBySpace(categoryCamelCase),
+      `${splitBySpace(subjectCamelCase)} Actions`,
+    ];
+
+    if (!categorisedActions[category]) {
+      categorisedActions[category] = {};
+    }
+
+    if (!categorisedActions[category][subject]) {
+      categorisedActions[category][subject] = [action];
+      continue;
+    }
+
+    categorisedActions[category][subject].push(action);
+  }
+
+  return categorisedActions;
 };
 
 export const getPaginatedUrl = (
