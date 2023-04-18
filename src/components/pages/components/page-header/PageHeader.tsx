@@ -70,7 +70,7 @@ const PageHeader: React.FC = () => {
     breadcrumbNameMap,
     selectedUser,
     getSelectedUser,
-    roleFormBtnsRefClick,
+    rolePageHeaderBtnsClick,
   } = usePageHeaderContext();
   const router = useRouter();
   const { pathname } = router;
@@ -217,6 +217,7 @@ const PageHeader: React.FC = () => {
     breadcrumbNameMap,
     onUsersTabChange,
     onTDRUserTabChange,
+    onCreateRoleTabChange,
   ]);
 
   const onClickEdit = () => {
@@ -280,13 +281,13 @@ const PageHeader: React.FC = () => {
       extra={
         router.pathname === ROUTE_CREATE_NEW_ROLE
           ? [
-              <Button key="0" onClick={roleFormBtnsRefClick.onCancel}>
+              <Button key="0" onClick={rolePageHeaderBtnsClick.onCancel}>
                 Cancel
               </Button>,
               <Button
                 key="1"
                 type="primary"
-                onClick={roleFormBtnsRefClick.onSave}
+                onClick={rolePageHeaderBtnsClick.onSave}
               >
                 Save
               </Button>,
