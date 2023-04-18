@@ -1,7 +1,7 @@
+import { Table, Tabs } from 'antd';
+import { Dispatch, FC, SetStateAction } from 'react';
 import { CategorisedActions } from '@/types/entities/IAction';
 import { RoleActions } from '@/types/payloads/role';
-import { Table, Tabs } from 'antd';
-import { Dispatch, FC, SetStateAction, useState } from 'react';
 import { getColumns } from './columns';
 
 type PermissionsProps = {
@@ -42,15 +42,23 @@ const Permissions: FC<PermissionsProps> = ({
     categoryTabItems.push({
       label: categoryKey,
       key: categoryKey,
-      children: permissionsTables,
+      children: (
+        <div style={{ maxHeight: '64vh', overflowY: 'auto' }}>
+          {permissionsTables}
+        </div>
+      ),
     });
   }
 
   return (
     <>
-      <div>Permissions</div>
+      <div style={{ fontWeight: 500, fontSize: 16 }}>Permissions</div>
 
-      <Tabs type="card" items={categoryTabItems} />
+      <Tabs
+        type="card"
+        items={categoryTabItems}
+        tabBarStyle={{ marginBottom: 24, marginTop: 10 }}
+      />
     </>
   );
 };

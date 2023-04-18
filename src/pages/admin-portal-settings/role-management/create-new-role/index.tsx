@@ -12,9 +12,10 @@ import { CreateRolePayload, RoleActions } from '@/types/payloads/role';
 import Role from '@/services/role';
 import { useRouter } from 'next/router';
 import { GENERAL } from '@/utils/constants';
+import { CheckCircleOutlined } from '@ant-design/icons';
+import { PRIMARY_BLUE } from '@/utils/colors';
 
 const CreateNewRole: FC = () => {
-  const [loading, setLoading] = useState<boolean>(false);
   const [categorisedActions, setCategorisedActions] =
     useState<CategorisedActions>({});
   const [actionsPermitted, setActionsPermitted] = useState<
@@ -37,9 +38,19 @@ const CreateNewRole: FC = () => {
 
       data.actions = actions;
 
-      await Role.createRole(data);
+      const newRole = await Role.createRole(data);
 
-      showNotification({ description: 'done', message: 'don' });
+      if (!newRole?.createdAt) {
+        throw new Error(
+          'We were unable to save your New Role. Please try again.',
+        );
+      }
+
+      const message = 'New Role Created';
+      const description = `${data.name} was successfully created!`;
+      const icon = <CheckCircleOutlined style={{ color: PRIMARY_BLUE }} />;
+
+      showNotification({ message, description, icon });
     } catch (err: any) {
       console.error(err);
       showErrorNotification(err);
@@ -55,7 +66,6 @@ const CreateNewRole: FC = () => {
   useEffect(() => {
     const loadAllActions = async () => {
       try {
-        setLoading(true);
         const actions = await Action.getAllActions();
 
         const categorisedActions = getCategorisedActions(actions);
@@ -64,8 +74,6 @@ const CreateNewRole: FC = () => {
       } catch (err: any) {
         console.error(err);
         showErrorNotification(err);
-      } finally {
-        setLoading(false);
       }
     };
 

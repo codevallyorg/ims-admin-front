@@ -21,10 +21,10 @@ const RoleForm: FC<RoleFormProps> = ({ readOnly, onSubmit, defaultValues }) => {
   const submitBtnRef = useRef<HTMLButtonElement>(null);
   const cancelBtnRef = useRef<HTMLButtonElement>(null);
 
-  const { roleFormBtnsRefClick } = usePageHeaderContext();
+  const { rolePageHeaderBtnsClick } = usePageHeaderContext();
 
-  roleFormBtnsRefClick.onSave = () => submitBtnRef.current?.click();
-  roleFormBtnsRefClick.onCancel = () => cancelBtnRef.current?.click();
+  rolePageHeaderBtnsClick.onSave = () => submitBtnRef.current?.click();
+  rolePageHeaderBtnsClick.onCancel = () => cancelBtnRef.current?.click();
 
   useEffect(() => {
     const loadRoleOptions = async () => {

@@ -32,7 +32,7 @@ type PageHeaderContextProps = {
   selectedUser: IUser | null;
   breadcrumbNameMap: Record<string, string>;
   getSelectedUser: () => void;
-  roleFormBtnsRefClick: { onSave: () => void; onCancel: () => void };
+  rolePageHeaderBtnsClick: { onSave: () => void; onCancel: () => void };
 };
 
 type PageHeaderProviderProps = {
@@ -44,7 +44,7 @@ const PageHeaderContext = createContext<PageHeaderContextProps>({
   selectedUser: null,
   breadcrumbNameMap: {},
   getSelectedUser: () => {},
-  roleFormBtnsRefClick: { onSave: () => {}, onCancel: () => {} },
+  rolePageHeaderBtnsClick: { onSave: () => {}, onCancel: () => {} },
 });
 
 const breadcrumbNameMapRecords: Record<string, string> = {
@@ -69,7 +69,7 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
     Record<string, string>
   >(breadcrumbNameMapRecords);
 
-  const roleFormBtnsRefClick = {
+  const rolePageHeaderBtnsClick = {
     onSave: () => {},
     onCancel: () => {},
   };
@@ -142,7 +142,7 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
         selectedUser,
         loadingPageHeader,
         getSelectedUser,
-        roleFormBtnsRefClick,
+        rolePageHeaderBtnsClick,
       }}
     >
       {children}
