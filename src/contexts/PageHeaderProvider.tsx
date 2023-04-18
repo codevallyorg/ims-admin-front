@@ -20,6 +20,9 @@ import {
   TDR_USERS,
   USERS,
   EDIT_USER_PROFILE,
+  ADMIN_PORTAL_SETTINGS,
+  ROLE_MANAGEMENT,
+  CREATE_NEW_ROLE,
 } from '@/utils/constants';
 import { preparePathname, showErrorNotification } from '@/utils/general';
 import User from '@/services/user';
@@ -29,6 +32,7 @@ type PageHeaderContextProps = {
   selectedUser: IUser | null;
   breadcrumbNameMap: Record<string, string>;
   getSelectedUser: () => void;
+  rolePageHeaderBtnsClick: { onSave: () => void; onCancel: () => void };
 };
 
 type PageHeaderProviderProps = {
@@ -40,6 +44,7 @@ const PageHeaderContext = createContext<PageHeaderContextProps>({
   selectedUser: null,
   breadcrumbNameMap: {},
   getSelectedUser: () => {},
+  rolePageHeaderBtnsClick: { onSave: () => {}, onCancel: () => {} },
 });
 
 const breadcrumbNameMapRecords: Record<string, string> = {
@@ -49,6 +54,10 @@ const breadcrumbNameMapRecords: Record<string, string> = {
   '/users/tdr-users': TDR_USERS,
   '/users/tdr-users/invite-new-tdr-user': INVITE_NEW_TDR_USER,
   '/users/archived-users': ARCHIVED_USERS,
+
+  '/admin-portal-settings': ADMIN_PORTAL_SETTINGS,
+  '/admin-portal-settings/role-management': ROLE_MANAGEMENT,
+  '/admin-portal-settings/role-management/create-new-role': CREATE_NEW_ROLE,
 };
 
 export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
@@ -59,6 +68,11 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
   const [breadcrumbNameMap, setBreadcrumbNameMap] = useState<
     Record<string, string>
   >(breadcrumbNameMapRecords);
+
+  const rolePageHeaderBtnsClick = {
+    onSave: () => {},
+    onCancel: () => {},
+  };
 
   const router = useRouter();
   const { pathname } = router;
@@ -128,6 +142,7 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
         selectedUser,
         loadingPageHeader,
         getSelectedUser,
+        rolePageHeaderBtnsClick,
       }}
     >
       {children}

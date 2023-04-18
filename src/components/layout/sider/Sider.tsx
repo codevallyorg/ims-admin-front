@@ -104,7 +104,7 @@ const SiderLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ height: '100vh' }}>
       <Sider
         collapsible
         collapsed={collapsed}
