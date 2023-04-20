@@ -19,31 +19,35 @@ import Button from '@/components/ui/button/Button';
 import { useRouter } from 'next/router';
 import { getArray, typeCastQueryToString } from '@/utils/general';
 
-type roleData = {
+export type RoleOption = ItemType & {
   id: number;
   name: string;
+  value: number;
 };
 
 export type TableToolbarProps = {
   name: string;
-  viewButtonLabel?: string;
-  inviteButtonLabel?: string;
+  secondaryButtonLabel?: string;
+  primaryButtonLabel?: string;
+  disabledSecondary?: boolean;
+  roleOptions?: RoleOption[];
   onSelectRole?: MenuClickEventHandler;
-  onClickView?: () => void;
-  onClickInvite?: () => void;
+  onClickSecondary?: () => void;
+  onClickPrimary?: () => void;
   onSearch?: (value: string) => void;
 };
 
 const TableToolbar: FC<TableToolbarProps> = ({
   name,
-  viewButtonLabel,
-  inviteButtonLabel,
+  secondaryButtonLabel,
+  primaryButtonLabel,
+  disabledSecondary,
+  roleOptions,
   onSelectRole,
-  onClickView,
-  onClickInvite,
+  onClickSecondary,
+  onClickPrimary,
   onSearch,
 }) => {
-  const [roleOptions, setRoleOptions] = useState<(ItemType & roleData)[]>([]);
   const [selectedRoleTags, setSelectedRoleTags] = useState<ReactElement[]>([]);
 
   const router = useRouter();
@@ -54,32 +58,6 @@ const TableToolbar: FC<TableToolbarProps> = ({
     () => getArray(filterByRole),
     [filterByRole],
   );
-
-  useEffect(() => {
-    const loadRoleOptions = async () => {
-      try {
-        const roles = await Role.getAllRoles();
-
-        const roleOptions: (ItemType & roleData)[] = [];
-
-        // TO DELETE
-        roles.forEach((role: any) => {
-          roleOptions.push({
-            key: role.id,
-            label: role.name,
-            id: role.id,
-            name: role.name,
-          });
-        });
-
-        setRoleOptions(roleOptions);
-      } catch (err: any) {
-        console.error(err);
-      }
-    };
-
-    onSelectRole && loadRoleOptions();
-  }, [onSelectRole]);
 
   const closeTagHandler = useCallback(
     (id: number) => {
@@ -95,6 +73,8 @@ const TableToolbar: FC<TableToolbarProps> = ({
   );
 
   useEffect(() => {
+    if (!roleOptions) return;
+
     const tags: ReactElement[] = [];
 
     for (const roleOption of roleOptions) {
@@ -171,16 +151,18 @@ const TableToolbar: FC<TableToolbarProps> = ({
           className={styles.searchBar}
         />
 
-        {viewButtonLabel && (
-          <Button onClick={onClickView}>{viewButtonLabel}</Button>
+        {secondaryButtonLabel && (
+          <Button onClick={onClickSecondary} disabled={disabledSecondary}>
+            {secondaryButtonLabel}
+          </Button>
         )}
 
-        {inviteButtonLabel && (
-          <Button type="primary" onClick={onClickInvite}>
+        {primaryButtonLabel && (
+          <Button type="primary" onClick={onClickPrimary}>
             <Space>
               <PlusOutlined />
 
-              <span>{inviteButtonLabel}</span>
+              <span>{primaryButtonLabel}</span>
             </Space>
           </Button>
         )}

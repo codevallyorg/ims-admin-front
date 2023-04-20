@@ -1,10 +1,10 @@
 import { FilterValue, TablePaginationConfig } from 'antd/lib/table/interface';
 import { useRouter } from 'next/router';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, Key, useCallback, useEffect, useState } from 'react';
 import { Table } from 'antd';
 
 import User from '@/services/user';
-import { UserType } from '@/types/entities/IUser';
+import { IUser, UserType } from '@/types/entities/IUser';
 import {
   OrderByEnum,
   OrderEnum,
@@ -12,8 +12,14 @@ import {
   PaginationOptions,
 } from '@/types/payloads/pagination';
 
-import { getArray, typeCastQueryToString } from '@/utils/general';
+import {
+  getArray,
+  showErrorNotification,
+  showNotification,
+  typeCastQueryToString,
+} from '@/utils/general';
 import TableToolbar, {
+  RoleOption,
   TableToolbarProps,
 } from '../../../ui/table-toolbar/TableToolbar';
 import styles from './RolesTable.module.css';
@@ -24,23 +30,23 @@ import {
   ROUTE_DASHBOARD_PORTAL_USERS,
   ROUTE_DASHBOARD_TDR_USERS,
 } from '@/utils/constants';
-
-export interface UserTableDataType {
-  key: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  roleName: string;
-  status: string;
-  updatedAt: string;
-  type: UserType;
-}
+import ReassignUsersRoleModal, {
+  ReassignUsersRoleModalProps,
+} from '../../modals/reassign-users-role/ReassignUsersRoleModal';
+import Role from '@/services/role';
+import { UserSwitchOutlined } from '@ant-design/icons';
+import { PRIMARY_BLUE } from '@/utils/colors';
 
 const RolesTable: FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [users, setUsers] = useState<UserTableDataType[]>([]);
+  const [users, setUsers] = useState<IUser[]>([]);
   const [pageMeta, setPageMeta] = useState<PageMeta>();
   const [possibleTotalUsers, setPossibleTotalUsers] = useState<number>(0);
+  const [selectedRows, setSelectedRows] = useState<IUser[]>([]);
+  const [roleOptions, setRoleOptions] = useState<RoleOption[]>();
+
+  const [openReassignUsersRoleModal, setOpenReassignUsersRoleModal] =
+    useState<boolean>(false);
 
   const router = useRouter();
 
@@ -62,11 +68,6 @@ const RolesTable: FC = () => {
       if (!page) return;
 
       const { data: users, meta } = await User.getAllUsers(router.query);
-
-      // TO DELETE
-      for (const user of users) {
-        user.key = user.id;
-      }
 
       setUsers(users);
       setPageMeta(meta);
@@ -91,7 +92,38 @@ const RolesTable: FC = () => {
     setPossibleTotalUsers(possibleTotalUsers);
   }, [pageMeta, router.query]);
 
-  const onClickView = () => {};
+  useEffect(() => {
+    const loadRoleOptions = async () => {
+      try {
+        const roles = await Role.getAllRoles();
+
+        const roleOptions: RoleOption[] = [];
+
+        // TO DELETE
+        roles.forEach((role: any) => {
+          roleOptions.push({
+            key: role.id,
+            label: role.name,
+            id: role.id,
+            name: role.name,
+            value: role.id,
+          });
+        });
+
+        setRoleOptions(roleOptions);
+      } catch (err: any) {
+        console.error(err);
+      }
+    };
+
+    loadRoleOptions();
+  }, []);
+
+  const rowSelection = {
+    onChange: (_: Key[], selectedRows: IUser[]) => {
+      setSelectedRows(selectedRows);
+    },
+  };
 
   const onSelectRoleItem = useCallback(
     (props: any) => {
@@ -171,12 +203,56 @@ const RolesTable: FC = () => {
     router.replace({ query: { ...router.query, search } });
   };
 
+  const reassignRoleHandler = async (selectedRole: RoleOption) => {
+    try {
+      setLoading(true);
+
+      const userIds = selectedRows.map((user) => user.id);
+
+      const response = await User.reassignRole(userIds, selectedRole.id);
+
+      if (response.count !== userIds.length) {
+        throw new Error('Failed to assign role to all users');
+      }
+
+      loadAllUsers();
+
+      const message = 'Role Re-assigned Successfully';
+      const icon = <UserSwitchOutlined style={{ color: PRIMARY_BLUE }} />;
+
+      selectedRows.forEach((user) => {
+        showNotification({
+          message,
+          icon,
+          description: `${user.firstName} ${user.lastName}'s role was successfully re-assigned to ${selectedRole.name}`,
+        });
+      });
+    } catch (err: any) {
+      console.error(err);
+      showErrorNotification(err);
+    } finally {
+      setLoading(false);
+      setOpenReassignUsersRoleModal(false);
+    }
+  };
+
   const toolbarProps: TableToolbarProps = {
     name: 'Manage user roles',
-    viewButtonLabel: 'Re-assign',
+    secondaryButtonLabel: 'Re-assign',
+    disabledSecondary: selectedRows.length ? false : true,
+    roleOptions,
     onSelectRole: onSelectRoleItem,
-    onClickView,
+    onClickSecondary: () => setOpenReassignUsersRoleModal(true),
     onSearch,
+  };
+
+  const reassignUsersRoleModalProps: ReassignUsersRoleModalProps = {
+    loading,
+    open: openReassignUsersRoleModal,
+    selectedUsers: selectedRows,
+    roleOptions,
+    onCancel: () => setOpenReassignUsersRoleModal(false),
+    onSubmit: reassignRoleHandler,
   };
 
   // if (!loading && users.length === 0) {
@@ -191,14 +267,17 @@ const RolesTable: FC = () => {
     <div>
       <TableToolbar {...toolbarProps} />
 
+      <ReassignUsersRoleModal {...reassignUsersRoleModalProps} />
+
       <Table
         columns={getColumns(router)}
+        loading={loading}
         // scroll={{ y: 360 }}
         dataSource={users}
-        rowSelection={{}}
-        loading={loading}
+        rowSelection={rowSelection}
         rowClassName={styles.row}
         onChange={columnActionsHandler}
+        rowKey={(record) => record.id}
         pagination={{
           responsive: true,
           hideOnSinglePage:
@@ -213,7 +292,7 @@ const RolesTable: FC = () => {
                 record.type === UserType.Portal
                   ? ROUTE_DASHBOARD_PORTAL_USERS
                   : ROUTE_DASHBOARD_TDR_USERS;
-              router.push(`${subUrl}/${record.key}`);
+              router.push(`${subUrl}/${record.id}`);
             },
           };
         }}

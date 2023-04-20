@@ -3,6 +3,7 @@ import {
   getAllUsers,
   getUser,
   inviteNewUser,
+  reassignRole,
   resetPassword,
   toggleArchiveUserProfile,
   toggleUserProfileLock,
@@ -57,5 +58,11 @@ export default class User {
   static async toggleUserProfileLock(id: number) {
     const { data } = await toggleUserProfileLock(id);
     return data.data;
+  }
+
+  static async reassignRole(userIds: number[], roleId: number) {
+    const { data } = await reassignRole(userIds, roleId);
+
+    return data;
   }
 }
