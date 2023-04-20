@@ -12,3 +12,5 @@ export const CHARACTER_SECONDARY = '#8D8D8D';
 export const NEUTRAL_5 = '#D9D9D9';
 
 export const BLUE_400 = '#0076C6';
+
+export const WHITE = '#ffffff';

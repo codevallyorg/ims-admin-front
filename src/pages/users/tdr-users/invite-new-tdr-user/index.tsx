@@ -10,7 +10,7 @@ import { PRIMARY_BLUE } from '@/utils/colors';
 import { showErrorNotification, showNotification } from '@/utils/general';
 import TDRUserForm from '@/components/pages/forms/tdr-user/TDRUserForm';
 import { UserType } from '@/types/entities/IUser';
-import { ROUTE_DASHBOARD_TDR_USERS } from '@/utils/constants';
+import { defaultStyle, ROUTE_DASHBOARD_TDR_USERS } from '@/utils/constants';
 
 const InviteNewTDRUser: FC = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -44,7 +44,11 @@ const InviteNewTDRUser: FC = () => {
     }
   };
 
-  return <TDRUserForm loading={submitting} onSubmit={onSubmit} />;
+  return (
+    <div style={defaultStyle}>
+      <TDRUserForm loading={submitting} onSubmit={onSubmit} />;
+    </div>
+  );
 };
 
 export default withLayout(InviteNewTDRUser, Private);

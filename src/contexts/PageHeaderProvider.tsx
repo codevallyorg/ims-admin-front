@@ -1,8 +1,10 @@
 import { useRouter } from 'next/router';
 import {
   createContext,
+  Dispatch,
   FC,
   ReactNode,
+  SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -27,12 +29,18 @@ import {
 import { preparePathname, showErrorNotification } from '@/utils/general';
 import User from '@/services/user';
 
+type BtnsClickActions = {
+  onSave: () => void;
+  onCancel: () => void;
+};
+
 type PageHeaderContextProps = {
   loadingPageHeader: boolean;
   selectedUser: IUser | null;
   breadcrumbNameMap: Record<string, string>;
   getSelectedUser: () => void;
-  rolePageHeaderBtnsClick: { onSave: () => void; onCancel: () => void };
+  rolePageHeaderBtnsClick: BtnsClickActions;
+  setRolePageHeaderBtnsClick: Dispatch<SetStateAction<BtnsClickActions>>;
 };
 
 type PageHeaderProviderProps = {
@@ -45,6 +53,7 @@ const PageHeaderContext = createContext<PageHeaderContextProps>({
   breadcrumbNameMap: {},
   getSelectedUser: () => {},
   rolePageHeaderBtnsClick: { onSave: () => {}, onCancel: () => {} },
+  setRolePageHeaderBtnsClick: () => {},
 });
 
 const breadcrumbNameMapRecords: Record<string, string> = {
@@ -68,11 +77,10 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
   const [breadcrumbNameMap, setBreadcrumbNameMap] = useState<
     Record<string, string>
   >(breadcrumbNameMapRecords);
-
-  const rolePageHeaderBtnsClick = {
+  const [rolePageHeaderBtnsClick, setRolePageHeaderBtnsClick] = useState({
     onSave: () => {},
     onCancel: () => {},
-  };
+  });
 
   const router = useRouter();
   const { pathname } = router;
@@ -143,6 +151,7 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
         loadingPageHeader,
         getSelectedUser,
         rolePageHeaderBtnsClick,
+        setRolePageHeaderBtnsClick,
       }}
     >
       {children}

@@ -1,3 +1,5 @@
+import { WHITE } from './colors';
+
 // Routes
 export const ROUTE_EXISTING_USER_LOGIN = '/auth/existing-user-login';
 export const ROUTE_NEW_USER_LOGIN = '/auth/new-user-login';
@@ -10,6 +12,7 @@ export const ROUTE_INVITE_NEW_PORTAL_USER =
 export const ROUTE_INVITE_NEW_TDR_USER = '/users/tdr-users/invite-new-tdr-user';
 export const ROUTE_CREATE_NEW_ROLE =
   '/admin-portal-settings/role-management/create-new-role';
+export const ROUTE_ROLE_MANAGEMENT = '/admin-portal-settings/role-management';
 
 // Users
 export const USERS = 'Users';
@@ -37,3 +40,9 @@ export const ADMIN_PORTAL_SETTINGS = 'Admin Portal Settings';
 export const ROLE_MANAGEMENT = 'Role Management';
 export const GENERAL = 'General';
 export const PERMISSIONS = 'Permissions';
+
+export const defaultStyle = {
+  margin: '20px 24px',
+  padding: 24,
+  backgroundColor: WHITE,
+};

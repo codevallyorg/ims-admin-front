@@ -3,7 +3,7 @@ import { FC, useState } from 'react';
 import { InvitePortalUserPayload } from '@/types/payloads/user';
 import User from '@/services/user';
 import { useRouter } from 'next/router';
-import { ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
+import { defaultStyle, ROUTE_DASHBOARD_PORTAL_USERS } from '@/utils/constants';
 import { withLayout } from '@/components/layout/utils';
 import Private from '@/components/layout/Private';
 import PortalUserForm from '@/components/pages/forms/portal-user/PortalUserForm';
@@ -42,7 +42,11 @@ const InviteNewPortalUser: FC = () => {
     }
   };
 
-  return <PortalUserForm loading={submitting} onSubmit={onSubmit} />;
+  return (
+    <div style={defaultStyle}>
+      <PortalUserForm loading={submitting} onSubmit={onSubmit} />;
+    </div>
+  );
 };
 
 export default withLayout(InviteNewPortalUser, Private);

@@ -20,6 +20,14 @@ export const endpointUrl = (url: string | undefined) => {
   return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/${url}`;
 };
 
+export const getArray = (query?: string | string[] | number): string[] => {
+  if (!query) return [];
+
+  return typeof query === 'string' || typeof query === 'number'
+    ? [`${query}`]
+    : query;
+};
+
 export const typeCastQueryToString = (
   query?: string | string[] | number,
 ): string => {

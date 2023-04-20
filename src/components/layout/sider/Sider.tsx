@@ -15,7 +15,7 @@ import React, { useState } from 'react';
 
 import FairPayLogo from '@/icons/FairPayLogo';
 import styles from './Sider.module.css';
-import { PRIMARY_BLUE } from '@/utils/colors';
+import { PRIMARY_BLUE, WHITE } from '@/utils/colors';
 import Header from '@/components/ui/header/Header';
 import Breadcrumb from '@/components/ui/breadcrumb/Breadcrumb';
 import { useRouter } from 'next/router';
@@ -139,24 +139,13 @@ const SiderLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
         {router.pathname !== ROUTE_USERS && (
           <Content>
-            <div style={{ padding: '16px 24px 0', backgroundColor: '#ffffff' }}>
+            <div style={{ padding: '16px 24px 0', backgroundColor: WHITE }}>
               <Breadcrumb />
 
               <PageHeader />
             </div>
 
-            <div
-              className="site-layout-background"
-              style={{
-                margin: '20px 24px',
-                padding: 24,
-                backgroundColor: '#ffffff',
-                // minHeight: 360,
-                minHeight: 200,
-              }}
-            >
-              {children}
-            </div>
+            {children}
           </Content>
         )}
       </Layout>

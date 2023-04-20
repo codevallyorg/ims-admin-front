@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import Permissions from '@/components/pages/components/permissions/Permissions';
 import RoleForm from '@/components/pages/forms/role/RoleForm';
 import Action from '@/services/action';
@@ -11,11 +11,26 @@ import {
 import { CreateRolePayload, RoleActions } from '@/types/payloads/role';
 import Role from '@/services/role';
 import { useRouter } from 'next/router';
-import { GENERAL } from '@/utils/constants';
+import {
+  defaultStyle,
+  GENERAL,
+  ROUTE_ROLE_MANAGEMENT,
+} from '@/utils/constants';
 import { CheckCircleOutlined } from '@ant-design/icons';
 import { PRIMARY_BLUE } from '@/utils/colors';
+import Private from '@/components/layout/Private';
+import { withLayout } from '@/components/layout/utils';
+import Loader from '@/components/ui/loader/Loader';
+
+export const initialRole = {
+  name: '',
+  needsApprovalFrom: [],
+};
 
 const CreateNewRole: FC = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [createRoleData, setCreateRoleData] =
+    useState<CreateRolePayload>(initialRole);
   const [categorisedActions, setCategorisedActions] =
     useState<CategorisedActions>({});
   const [actionsPermitted, setActionsPermitted] = useState<
@@ -25,37 +40,41 @@ const CreateNewRole: FC = () => {
   const router = useRouter();
   const { tab } = router.query;
 
-  const onSubmit = async (data: CreateRolePayload) => {
-    try {
-      const actions: RoleActions[] = [];
+  const onSubmit = useCallback(
+    async (data: CreateRolePayload) => {
+      try {
+        const actions: RoleActions[] = [];
 
-      for (const key in actionsPermitted) {
-        if (actionsPermitted[key] === undefined) return;
+        for (const key in actionsPermitted) {
+          if (actionsPermitted[key] === undefined) return;
 
-        // @ts-ignore
-        actions.push(actionsPermitted[key]);
+          // @ts-ignore
+          actions.push(actionsPermitted[key]);
+        }
+
+        data.actions = actions;
+
+        const newRole = await Role.createRole(data);
+
+        if (!newRole?.createdAt) {
+          throw new Error(
+            'We were unable to save your New Role. Please try again.',
+          );
+        }
+
+        const message = 'New Role Created';
+        const description = `${data.name} was successfully created!`;
+        const icon = <CheckCircleOutlined style={{ color: PRIMARY_BLUE }} />;
+
+        showNotification({ message, description, icon });
+        router.push(ROUTE_ROLE_MANAGEMENT);
+      } catch (err: any) {
+        console.error(err);
+        showErrorNotification(err);
       }
-
-      data.actions = actions;
-
-      const newRole = await Role.createRole(data);
-
-      if (!newRole?.createdAt) {
-        throw new Error(
-          'We were unable to save your New Role. Please try again.',
-        );
-      }
-
-      const message = 'New Role Created';
-      const description = `${data.name} was successfully created!`;
-      const icon = <CheckCircleOutlined style={{ color: PRIMARY_BLUE }} />;
-
-      showNotification({ message, description, icon });
-    } catch (err: any) {
-      console.error(err);
-      showErrorNotification(err);
-    }
-  };
+    },
+    [router, actionsPermitted],
+  );
 
   useEffect(() => {
     if (tab) return;
@@ -66,6 +85,7 @@ const CreateNewRole: FC = () => {
   useEffect(() => {
     const loadAllActions = async () => {
       try {
+        setLoading(true);
         const actions = await Action.getAllActions();
 
         const categorisedActions = getCategorisedActions(actions);
@@ -74,14 +94,26 @@ const CreateNewRole: FC = () => {
       } catch (err: any) {
         console.error(err);
         showErrorNotification(err);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadAllActions();
   }, []);
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return tab === GENERAL ? (
-    <RoleForm onSubmit={onSubmit} />
+    <div style={defaultStyle}>
+      <RoleForm
+        onSubmit={onSubmit}
+        defaultValues={createRoleData}
+        setCreateRoleData={setCreateRoleData}
+      />
+    </div>
   ) : (
     <Permissions
       categorisedActions={categorisedActions}
@@ -91,4 +123,4 @@ const CreateNewRole: FC = () => {
   );
 };
 
-export default CreateNewRole;
+export default withLayout(CreateNewRole, Private);
