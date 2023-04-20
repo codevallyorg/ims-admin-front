@@ -286,7 +286,7 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     onSearch,
   };
 
-  if (users.length === 0) {
+  if (!loading && users.length === 0) {
     return (
       <Empty image={<Exclamation />} description={false}>
         <EmptyText>

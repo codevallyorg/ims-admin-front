@@ -14,7 +14,7 @@ export type TableToolbarProps = {
   name: string;
   viewButtonLabel?: string;
   inviteButtonLabel?: string;
-  selectedRoleKey?: string;
+  selectedRoleKeys?: string[];
   defaultSearchText?: string;
   onSelectRole?: MenuClickEventHandler;
   onClickView?: () => void;
@@ -26,7 +26,7 @@ const TableToolbar: FC<TableToolbarProps> = ({
   name,
   viewButtonLabel,
   inviteButtonLabel,
-  selectedRoleKey,
+  selectedRoleKeys,
   defaultSearchText,
   onSelectRole,
   onClickView,
@@ -41,7 +41,9 @@ const TableToolbar: FC<TableToolbarProps> = ({
         const roles = await Role.getRoleSelectOptions();
 
         // TO DELETE
-        roles.forEach((role: any) => (role.key = role.value));
+        roles.forEach((role: any) => {
+          role.key = role.value;
+        });
 
         setRoleOptions(roles);
       } catch (err: any) {
@@ -58,22 +60,29 @@ const TableToolbar: FC<TableToolbarProps> = ({
 
       <div className={styles.rightSide}>
         {onSelectRole && (
-          <Dropdown
-            menu={{
-              items: roleOptions,
-              onClick: onSelectRole,
-              selectedKeys: [selectedRoleKey || ''],
-            }}
-            trigger={['click']}
-            className={styles.dropdown}
-          >
-            <Space
-              style={selectedRoleKey ? { color: SECONDARY_BLUE } : undefined}
+          <>
+            <Dropdown
+              menu={{
+                items: roleOptions,
+                onClick: onSelectRole,
+                selectedKeys: selectedRoleKeys,
+                multiple: true,
+              }}
+              trigger={['click']}
+              className={styles.dropdown}
             >
-              By role
-              <DownOutlined />
-            </Space>
-          </Dropdown>
+              <Space
+                style={
+                  selectedRoleKeys?.length
+                    ? { color: SECONDARY_BLUE }
+                    : undefined
+                }
+              >
+                Filter by Role
+                <DownOutlined />
+              </Space>
+            </Dropdown>
+          </>
         )}
 
         <Search

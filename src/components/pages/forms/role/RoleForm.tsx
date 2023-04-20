@@ -1,30 +1,73 @@
 import { Button, Form, Input, Select } from 'antd';
-import { FC, useEffect, useRef, useState } from 'react';
+import {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import Role from '@/services/role';
 import { RoleSelectOptions } from '@/types/entities/IRole';
 import styles from './RoleForm.module.css';
 import { CreateRolePayload } from '@/types/payloads/role';
 import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
+import { useForm } from 'antd/lib/form/Form';
+import { initialRole } from '@/pages/admin-portal-settings/role-management/create-new-role';
 
 type RoleFormProps = {
   onSubmit?: (data: CreateRolePayload) => void;
   readOnly?: boolean;
-  defaultValues?: any;
+  defaultValues: CreateRolePayload;
+  setCreateRoleData?: Dispatch<SetStateAction<CreateRolePayload>>;
 };
 
-const RoleForm: FC<RoleFormProps> = ({ readOnly, onSubmit, defaultValues }) => {
+const RoleForm: FC<RoleFormProps> = ({
+  readOnly,
+  onSubmit,
+  defaultValues,
+  setCreateRoleData,
+}) => {
   const [roleSelectOptions, setRoleSelectOptions] = useState<
     RoleSelectOptions[]
   >([]);
 
+  const [form] = useForm();
+
   const submitBtnRef = useRef<HTMLButtonElement>(null);
   const cancelBtnRef = useRef<HTMLButtonElement>(null);
 
-  const { rolePageHeaderBtnsClick } = usePageHeaderContext();
+  const { setRolePageHeaderBtnsClick } = usePageHeaderContext();
 
-  rolePageHeaderBtnsClick.onSave = () => submitBtnRef.current?.click();
-  rolePageHeaderBtnsClick.onCancel = () => cancelBtnRef.current?.click();
+  useEffect(() => {
+    const resetFormData = () => {
+      setCreateRoleData && setCreateRoleData(initialRole);
+      form.setFieldsValue(initialRole);
+    };
+
+    const onSave = async () => {
+      submitBtnRef.current?.click();
+
+      await form.validateFields();
+
+      onSubmit && onSubmit(defaultValues);
+      resetFormData();
+    };
+
+    const onCancel = () => {
+      cancelBtnRef.current?.click();
+      resetFormData();
+    };
+
+    setRolePageHeaderBtnsClick({ onSave, onCancel });
+  }, [
+    onSubmit,
+    form,
+    defaultValues,
+    setCreateRoleData,
+    setRolePageHeaderBtnsClick,
+  ]);
 
   useEffect(() => {
     const loadRoleOptions = async () => {
@@ -39,18 +82,24 @@ const RoleForm: FC<RoleFormProps> = ({ readOnly, onSubmit, defaultValues }) => {
     loadRoleOptions();
   }, []);
 
+  const formValuesChangeHandler = (changedValues: any) => {
+    setCreateRoleData &&
+      setCreateRoleData((curData) => ({ ...curData, ...changedValues }));
+  };
+
   return (
     <Form
       name="basic"
+      form={form}
       labelCol={{ span: 8 }}
       wrapperCol={{ span: 16 }}
       initialValues={{
         remember: true,
         ...defaultValues,
       }}
-      onFinish={onSubmit}
       autoComplete="off"
       className={styles.form}
+      onValuesChange={formValuesChangeHandler}
     >
       <Form.Item
         label="Set your Role name"

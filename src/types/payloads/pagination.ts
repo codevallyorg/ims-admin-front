@@ -7,6 +7,7 @@ export enum OrderByEnum {
   firstName = 'firstName',
   lastName = 'lastName',
   idNumber = 'idNumber',
+  role = 'role',
 }
 
 export enum OrderEnum {

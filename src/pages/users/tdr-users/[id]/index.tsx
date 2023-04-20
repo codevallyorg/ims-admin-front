@@ -5,7 +5,12 @@ import Private from '@/components/layout/Private';
 import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
 import TDRUserForm from '@/components/pages/forms/tdr-user/TDRUserForm';
 import { useRouter } from 'next/router';
-import { ASSIGNED_AGENTS, CARD_STOCK, PROFILE } from '@/utils/constants';
+import {
+  ASSIGNED_AGENTS,
+  CARD_STOCK,
+  defaultStyle,
+  PROFILE,
+} from '@/utils/constants';
 import AssignedAgents from '@/components/pages/components/assigned-agents/AssignedAgents';
 import CardStock from '@/components/pages/components/card-stock/CardStock';
 
@@ -43,7 +48,7 @@ const ViewUserProfile: FC = () => {
       break;
   }
 
-  return Component;
+  return <div style={defaultStyle}>{Component}</div>;
 };
 
 export default withLayout(ViewUserProfile, Private);

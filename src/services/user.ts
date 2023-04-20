@@ -25,7 +25,7 @@ export default class User {
 
   static async getAllUsers(
     paginationOptions: PaginationOptions,
-    archived: boolean,
+    archived: boolean = false,
   ) {
     const { data } = await getAllUsers(paginationOptions, archived);
     return data;

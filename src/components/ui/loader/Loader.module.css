@@ -1,6 +1,6 @@
 .container {
   min-width: inherit;
-  min-height: inherit;
+  min-height: 120px;
   display: flex;
   justify-content: center;
   align-items: center;

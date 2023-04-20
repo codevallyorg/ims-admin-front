@@ -7,5 +7,5 @@ export type CreateRolePayload = {
   name: string;
   description?: string;
   needsApprovalFrom: number[];
-  actions: RoleActions[];
+  actions?: RoleActions[];
 };

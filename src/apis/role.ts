@@ -9,3 +9,7 @@ export const getRoleSelectOptions = () => {
 export const createRole = (payload: CreateRolePayload) => {
   return axiosInstance.post(endpointUrl('roles'), payload);
 };
+
+export const getAllRoles = () => {
+  return axiosInstance.get(endpointUrl('roles'));
+};

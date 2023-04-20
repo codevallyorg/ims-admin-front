@@ -3,6 +3,8 @@ import { Dispatch, FC, SetStateAction } from 'react';
 import { CategorisedActions } from '@/types/entities/IAction';
 import { RoleActions } from '@/types/payloads/role';
 import { getColumns } from './columns';
+import { defaultStyle } from '@/utils/constants';
+import styles from './Permissions.module.css';
 
 type PermissionsProps = {
   categorisedActions: CategorisedActions;
@@ -34,7 +36,6 @@ const Permissions: FC<PermissionsProps> = ({
           dataSource={categorisedActions[categoryKey][subjectKey]}
           rowKey={(record) => record.id}
           pagination={false}
-          style={{ marginBottom: 56 }}
         />,
       );
     }
@@ -43,23 +44,22 @@ const Permissions: FC<PermissionsProps> = ({
       label: categoryKey,
       key: categoryKey,
       children: (
-        <div style={{ maxHeight: '64vh', overflowY: 'auto' }}>
-          {permissionsTables}
-        </div>
+        <div className={styles.tablesContainer}>{permissionsTables}</div>
       ),
     });
   }
 
   return (
-    <>
-      <div style={{ fontWeight: 500, fontSize: 16 }}>Permissions</div>
+    <div style={{ ...defaultStyle, padding: 0 }}>
+      <div className={styles.permissions}>Permissions</div>
 
       <Tabs
         type="card"
         items={categoryTabItems}
         tabBarStyle={{ marginBottom: 24, marginTop: 10 }}
+        tabBarExtraContent={{ left: <div>&nbsp;&ensp;&emsp;</div> }}
       />
-    </>
+    </div>
   );
 };
 

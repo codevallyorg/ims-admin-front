@@ -24,6 +24,7 @@ import {
   ROUTE_DASHBOARD_TDR_USERS,
   ROUTE_INVITE_NEW_PORTAL_USER,
   ROUTE_INVITE_NEW_TDR_USER,
+  ROUTE_ROLE_MANAGEMENT,
   TDR_USERS,
 } from '@/utils/constants';
 import { EllipsisOutlined } from '@ant-design/icons';
@@ -162,7 +163,10 @@ const PageHeader: React.FC = () => {
       return;
     }
 
-    if (preparedPath.includes('edit-user-profile')) {
+    if (
+      preparedPath.includes('edit-user-profile') ||
+      preparedPath === ROUTE_ROLE_MANAGEMENT
+    ) {
       setFooter(<div style={{ paddingBottom: 1 }} />);
       return;
     }
