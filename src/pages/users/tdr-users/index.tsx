@@ -9,7 +9,7 @@ import { defaultStyle } from '@/utils/constants';
 const TDRUsers: FC = () => {
   return (
     <div style={defaultStyle}>
-      <UsersTable userType={UserType.TDR} />;
+      <UsersTable userType={UserType.TDR} />
     </div>
   );
 };

@@ -9,7 +9,7 @@ import { defaultStyle } from '@/utils/constants';
 const ArchivedUsers: FC = () => {
   return (
     <div style={defaultStyle}>
-      <UsersTable userType={UserType.Archived} />;
+      <UsersTable userType={UserType.Archived} />
     </div>
   );
 };

@@ -1,10 +1,10 @@
 import { FilterValue, TablePaginationConfig } from 'antd/lib/table/interface';
 import { useRouter } from 'next/router';
 import { FC, useCallback, useEffect, useState } from 'react';
-import { Empty, Table } from 'antd';
+import { Table } from 'antd';
 
 import User from '@/services/user';
-import { UserStatus, UserType } from '@/types/entities/IUser';
+import { UserType } from '@/types/entities/IUser';
 import {
   OrderByEnum,
   OrderEnum,
@@ -91,7 +91,7 @@ const RolesTable: FC = () => {
     setPossibleTotalUsers(possibleTotalUsers);
   }, [pageMeta, router.query]);
 
-  const onClickInvite = () => {};
+  const onClickView = () => {};
 
   const onSelectRoleItem = useCallback(
     (props: any) => {
@@ -174,10 +174,8 @@ const RolesTable: FC = () => {
   const toolbarProps: TableToolbarProps = {
     name: 'Manage user roles',
     viewButtonLabel: 'Re-assign',
-    selectedRoleKeys: getArray(router.query.filterByRole),
-    defaultSearchText: typeCastQueryToString(router.query.search),
     onSelectRole: onSelectRoleItem,
-    onClickInvite,
+    onClickView,
     onSearch,
   };
 

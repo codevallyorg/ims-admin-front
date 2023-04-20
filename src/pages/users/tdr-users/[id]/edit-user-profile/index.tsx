@@ -9,7 +9,7 @@ import { defaultStyle } from '@/utils/constants';
 const EditTDRUserProfile: FC = () => {
   return (
     <div style={defaultStyle}>
-      <EditUserProfile userType={UserType.TDR} />;
+      <EditUserProfile userType={UserType.TDR} />
     </div>
   );
 };
