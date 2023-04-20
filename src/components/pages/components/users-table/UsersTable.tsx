@@ -23,6 +23,7 @@ import {
   TDR_USERS,
 } from '@/utils/constants';
 import {
+  getArray,
   showErrorNotification,
   showNotification,
   typeCastQueryToString,
@@ -139,13 +140,21 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     (props: any) => {
       const { filterByRole } = router.query;
 
-      let roleKey = undefined;
+      const { key } = props;
 
-      if (filterByRole !== props.key) {
-        roleKey = props.key;
+      let filteredRoles = getArray(filterByRole);
+
+      const selectRoleIndex = filteredRoles.indexOf(key);
+
+      if (selectRoleIndex !== -1) {
+        filteredRoles.splice(selectRoleIndex, 1);
+      } else {
+        filteredRoles.push(key);
       }
 
-      router.replace({ query: { ...router.query, filterByRole: roleKey } });
+      router.replace({
+        query: { ...router.query, filterByRole: filteredRoles },
+      });
     },
     [router],
   );
@@ -279,8 +288,6 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     name,
     viewButtonLabel,
     inviteButtonLabel,
-    selectedRoleKey: typeCastQueryToString(router.query.filterByRole),
-    defaultSearchText: typeCastQueryToString(router.query.search),
     onSelectRole,
     onClickInvite,
     onSearch,

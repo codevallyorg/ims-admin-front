@@ -9,7 +9,7 @@ import { defaultStyle } from '@/utils/constants';
 const PortalUsers: FC = () => {
   return (
     <div style={defaultStyle}>
-      <UsersTable userType={UserType.Portal} />;
+      <UsersTable userType={UserType.Portal} />
     </div>
   );
 };

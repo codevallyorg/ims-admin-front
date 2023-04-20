@@ -44,7 +44,7 @@ const InviteNewPortalUser: FC = () => {
 
   return (
     <div style={defaultStyle}>
-      <PortalUserForm loading={submitting} onSubmit={onSubmit} />;
+      <PortalUserForm loading={submitting} onSubmit={onSubmit} />
     </div>
   );
 };

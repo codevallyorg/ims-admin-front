@@ -46,7 +46,7 @@ const InviteNewTDRUser: FC = () => {
 
   return (
     <div style={defaultStyle}>
-      <TDRUserForm loading={submitting} onSubmit={onSubmit} />;
+      <TDRUserForm loading={submitting} onSubmit={onSubmit} />
     </div>
   );
 };
