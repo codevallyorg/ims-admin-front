@@ -29,6 +29,7 @@ import {
   typeCastQueryToString,
 } from '@/utils/general';
 import TableToolbar, {
+  RoleOption,
   TableToolbarProps,
 } from '../../../ui/table-toolbar/TableToolbar';
 import styles from './UsersTable.module.css';
@@ -37,6 +38,7 @@ import { SyncOutlined } from '@ant-design/icons';
 import { PRIMARY_BLUE } from '@/utils/colors';
 import Exclamation from '@/icons/Exclamation';
 import EmptyText from '@/components/ui/empty-text/EmptyText';
+import Role from '@/services/role';
 
 export interface UserTableDataType {
   key: number;
@@ -59,6 +61,7 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
   const [possibleTotalUsers, setPossibleTotalUsers] = useState<number>(0);
   const [popconfirmSubmitting, setPopconfirmSubmitting] =
     useState<boolean>(false);
+  const [roleOptions, setRoleOptions] = useState<RoleOption[]>();
 
   const router = useRouter();
 
@@ -126,6 +129,33 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
 
     setPossibleTotalUsers(possibleTotalUsers);
   }, [pageMeta, router.query]);
+
+  useEffect(() => {
+    const loadRoleOptions = async () => {
+      try {
+        const roles = await Role.getAllRoles();
+
+        const roleOptions: RoleOption[] = [];
+
+        // TO DELETE
+        roles.forEach((role: any) => {
+          roleOptions.push({
+            key: role.id,
+            label: role.name,
+            id: role.id,
+            name: role.name,
+            value: role.id,
+          });
+        });
+
+        setRoleOptions(roleOptions);
+      } catch (err: any) {
+        console.error(err);
+      }
+    };
+
+    loadRoleOptions();
+  }, []);
 
   const onClickInvite = () => {
     const url =
@@ -286,10 +316,11 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
 
   const toolbarProps: TableToolbarProps = {
     name,
-    viewButtonLabel,
-    inviteButtonLabel,
+    secondaryButtonLabel: viewButtonLabel,
+    primaryButtonLabel: inviteButtonLabel,
+    roleOptions,
     onSelectRole,
-    onClickInvite,
+    onClickPrimary: onClickInvite,
     onSearch,
   };
 

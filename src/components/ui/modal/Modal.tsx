@@ -11,6 +11,7 @@ type ModalProps = {
   onSubmit: () => void;
   okButtonLabel: string;
   children: ReactNode;
+  width?: string | number;
 };
 
 const Modal: FC<ModalProps> = ({
@@ -21,6 +22,7 @@ const Modal: FC<ModalProps> = ({
   onSubmit,
   okButtonLabel,
   children,
+  width,
 }) => {
   return (
     <ModalAntd
@@ -28,6 +30,7 @@ const Modal: FC<ModalProps> = ({
       open={open}
       title={title}
       onCancel={onCancel}
+      width={width}
       footer={[
         <Button key="back" disabled={loading} onClick={onCancel}>
           Cancel

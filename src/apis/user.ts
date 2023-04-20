@@ -45,3 +45,10 @@ export const toggleUserProfileLock = (id: number) => {
 export const toggleArchiveUserProfile = (id: number) => {
   return axiosInstance.patch(endpointUrl(`users/toggle-archived/${id}`));
 };
+
+export const reassignRole = (userIds: number[], roleId: number) => {
+  return axiosInstance.patch(endpointUrl('users/reassign-role'), {
+    userIds,
+    roleId,
+  });
+};
