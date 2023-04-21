@@ -5,7 +5,7 @@ import { NextRouter } from 'next/router';
 import Link from 'next/link';
 import { MouseEvent } from 'react';
 
-import { UserStatus, UserType } from '@/types/entities/IUser';
+import { IUser, UserStatus, UserType } from '@/types/entities/IUser';
 import {
   NEUTRAL_5,
   PRIMARY_RED,
@@ -17,7 +17,6 @@ import {
   ROUTE_DASHBOARD_TDR_USERS,
 } from '@/utils/constants';
 import { OrderByEnum, OrderEnum } from '@/types/payloads/pagination';
-import { UserTableDataType } from './UsersTable';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 
 const popconfirmTitle = 'Are you sure you would like to unachive this profile?';
@@ -48,8 +47,8 @@ export const getColumns = (
   router: NextRouter,
   isArchivedDashboard: boolean,
   popconfirmSubmitting: boolean,
-  onUnarchive: (user: UserTableDataType) => void,
-): ColumnsType<UserTableDataType> => {
+  onUnarchive: (user: IUser) => void,
+): ColumnsType<IUser> => {
   const { orderBy, order, filterByStatus, filterByType } = router.query;
 
   const dashboardUrl =
@@ -142,7 +141,7 @@ export const getColumns = (
       render: (_, user) =>
         !isArchivedDashboard ? (
           <Link
-            href={`${dashboardUrl}/${user.key}/edit-user-profile`}
+            href={`${dashboardUrl}/${user.id}/edit-user-profile`}
             onClick={stopPropagation}
           >
             Edit

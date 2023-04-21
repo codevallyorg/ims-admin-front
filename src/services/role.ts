@@ -1,4 +1,9 @@
-import { createRole, getAllRoles, getRoleSelectOptions } from '@/apis/role';
+import {
+  createRole,
+  getAllRoles,
+  getRole,
+  getRoleSelectOptions,
+} from '@/apis/role';
 import { CreateRolePayload } from '@/types/payloads/role';
 
 export default class Role {
@@ -14,6 +19,11 @@ export default class Role {
 
   static async getAllRoles() {
     const { data } = await getAllRoles();
+    return data;
+  }
+
+  static async getRole(id: number) {
+    const { data } = await getRole(id);
     return data;
   }
 }

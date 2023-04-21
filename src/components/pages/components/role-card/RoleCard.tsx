@@ -6,10 +6,15 @@ import { IRole } from '@/types/entities/IRole';
 import { showErrorNotification } from '@/utils/general';
 import { CHARACTER_SECONDARY } from '@/utils/colors';
 import { AntDesignOutlined, UserOutlined } from '@ant-design/icons';
+import styles from './RoleCard.module.css';
+import Link from 'next/link';
+import { ROUTE_ROLE_MANAGEMENT } from '@/utils/constants';
 
 const RoleCard: FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [roles, setRoles] = useState<IRole[]>([]);
+
+  console.log('RoleCard');
 
   useEffect(() => {
     const loadAllRoles = async () => {
@@ -76,7 +81,14 @@ const RoleCard: FC = () => {
             </Col>
 
             <Col flex="auto" style={{ margin: '0 16px' }}>
-              <div style={{ fontSize: 16, fontWeight: 500 }}>{item.name}</div>
+              <div className={styles.roleName}>
+                <Link
+                  style={{ color: 'inherit' }}
+                  href={`${ROUTE_ROLE_MANAGEMENT}/${item.id}`}
+                >
+                  {item.name}
+                </Link>
+              </div>
 
               <div
                 style={{ color: CHARACTER_SECONDARY }}

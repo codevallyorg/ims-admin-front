@@ -12,7 +12,6 @@ import {
 } from 'react';
 
 import { SECONDARY_BLUE } from '@/utils/colors';
-import Role from '@/services/role';
 import { DownOutlined, PlusOutlined } from '@ant-design/icons';
 import styles from './TableToolbar.module.css';
 import Button from '@/components/ui/button/Button';
@@ -26,10 +25,11 @@ export type RoleOption = ItemType & {
 };
 
 export type TableToolbarProps = {
-  name: string;
+  name?: string;
   secondaryButtonLabel?: string;
   primaryButtonLabel?: string;
   disabledSecondary?: boolean;
+  isViewRole?: boolean;
   roleOptions?: RoleOption[];
   onSelectRole?: MenuClickEventHandler;
   onClickSecondary?: () => void;
@@ -42,6 +42,7 @@ const TableToolbar: FC<TableToolbarProps> = ({
   secondaryButtonLabel,
   primaryButtonLabel,
   disabledSecondary,
+  isViewRole,
   roleOptions,
   onSelectRole,
   onClickSecondary,
@@ -110,12 +111,26 @@ const TableToolbar: FC<TableToolbarProps> = ({
     setSelectedRoleTags(tags);
   }, [closeTagHandler, roleOptions, selectedRoleKeys]);
 
+  const searchBar = (
+    <Search
+      placeholder="input search text"
+      defaultValue={defaultSearchText}
+      allowClear
+      onSearch={onSearch}
+      className={styles.searchBar}
+    />
+  );
+
   return (
     <div className={styles.toolBar}>
-      <div style={{ fontSize: 16, fontWeight: 500 }}>{name}</div>
+      {isViewRole ? (
+        searchBar
+      ) : (
+        <div style={{ fontSize: 16, fontWeight: 500 }}>{name}</div>
+      )}
 
       <div className={styles.rightSide}>
-        {onSelectRole && (
+        {!isViewRole && onSelectRole && (
           <>
             <div>{selectedRoleTags}</div>
 
@@ -143,13 +158,7 @@ const TableToolbar: FC<TableToolbarProps> = ({
           </>
         )}
 
-        <Search
-          placeholder="input search text"
-          defaultValue={defaultSearchText}
-          allowClear
-          onSearch={onSearch}
-          className={styles.searchBar}
-        />
+        {!isViewRole && searchBar}
 
         {secondaryButtonLabel && (
           <Button onClick={onClickSecondary} disabled={disabledSecondary}>

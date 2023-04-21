@@ -1,0 +1,9 @@
+.roleName {
+  font-size: medium;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.roleName:hover {
+  text-decoration: underline;
+}

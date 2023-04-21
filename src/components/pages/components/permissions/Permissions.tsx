@@ -1,20 +1,22 @@
 import { Table, Tabs } from 'antd';
 import { Dispatch, FC, SetStateAction } from 'react';
 import { CategorisedActions } from '@/types/entities/IAction';
-import { RoleActions } from '@/types/payloads/role';
 import { getColumns } from './columns';
 import { defaultStyle } from '@/utils/constants';
 import styles from './Permissions.module.css';
+import { RoleActionsPayload } from '@/types/payloads/role';
 
 type PermissionsProps = {
+  readOnly?: boolean;
   categorisedActions: CategorisedActions;
-  actionsPermitted: Record<number, RoleActions | undefined>;
+  actionsPermitted: Record<number, RoleActionsPayload | undefined>;
   setActionsPermitted: Dispatch<
-    SetStateAction<Record<number, RoleActions | undefined>>
+    SetStateAction<Record<number, RoleActionsPayload | undefined>>
   >;
 };
 
 const Permissions: FC<PermissionsProps> = ({
+  readOnly,
   categorisedActions,
   actionsPermitted,
   setActionsPermitted,
@@ -32,6 +34,7 @@ const Permissions: FC<PermissionsProps> = ({
             subjectKey,
             actionsPermitted,
             setActionsPermitted,
+            readOnly,
           )}
           dataSource={categorisedActions[categoryKey][subjectKey]}
           rowKey={(record) => record.id}

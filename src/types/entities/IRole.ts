@@ -5,10 +5,20 @@ export type RoleSelectOptions = {
   label: string;
 };
 
+export type RoleActions = {
+  id: number;
+  roleId: number;
+  actionId: number;
+  needsApproval: true;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type IRole = {
   id: number;
   name: string;
   description: string;
+  protected: boolean;
   archived: boolean;
   createdBy: number;
   updatedBy: number;
@@ -16,4 +26,5 @@ export type IRole = {
   updatedAt: string;
   needsApprovalFrom: number[];
   users: IUser[];
+  RoleActions: RoleActions[];
 };

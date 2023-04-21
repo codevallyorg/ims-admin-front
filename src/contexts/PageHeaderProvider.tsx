@@ -25,9 +25,12 @@ import {
   ADMIN_PORTAL_SETTINGS,
   ROLE_MANAGEMENT,
   CREATE_NEW_ROLE,
+  EDIT_ROLE,
 } from '@/utils/constants';
 import { preparePathname, showErrorNotification } from '@/utils/general';
 import User from '@/services/user';
+import { IRole } from '@/types/entities/IRole';
+import Role from '@/services/role';
 
 type BtnsClickActions = {
   onSave: () => void;
@@ -36,9 +39,11 @@ type BtnsClickActions = {
 
 type PageHeaderContextProps = {
   loadingPageHeader: boolean;
-  selectedUser: IUser | null;
   breadcrumbNameMap: Record<string, string>;
+  selectedUser: IUser | null;
   getSelectedUser: () => void;
+  selectedRole: IRole | null;
+  getSelectedRole: () => void;
   rolePageHeaderBtnsClick: BtnsClickActions;
   setRolePageHeaderBtnsClick: Dispatch<SetStateAction<BtnsClickActions>>;
 };
@@ -49,9 +54,11 @@ type PageHeaderProviderProps = {
 
 const PageHeaderContext = createContext<PageHeaderContextProps>({
   loadingPageHeader: false,
-  selectedUser: null,
   breadcrumbNameMap: {},
+  selectedUser: null,
   getSelectedUser: () => {},
+  selectedRole: null,
+  getSelectedRole: () => {},
   rolePageHeaderBtnsClick: { onSave: () => {}, onCancel: () => {} },
   setRolePageHeaderBtnsClick: () => {},
 });
@@ -74,6 +81,7 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
 }) => {
   const [loadingPageHeader, setLoadingPageHeader] = useState<boolean>(true);
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
+  const [selectedRole, setSelectedRole] = useState<IRole | null>(null);
   const [breadcrumbNameMap, setBreadcrumbNameMap] = useState<
     Record<string, string>
   >(breadcrumbNameMapRecords);
@@ -89,8 +97,6 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
   const addIntoBreadcrumbNameMap = useCallback(
     (user: IUser) => {
       const preparedPath = preparePathname(pathname, user.id);
-
-      if (breadcrumbNameMap[preparedPath] !== undefined) return;
 
       const newBreadcrumbRecords: Record<string, string> = {};
 
@@ -114,7 +120,7 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
         ...newBreadcrumbRecords,
       }));
     },
-    [pathname, breadcrumbNameMap],
+    [pathname],
   );
 
   const getSelectedUser = useCallback(async () => {
@@ -139,17 +145,63 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
     }
   }, [id, addIntoBreadcrumbNameMap]);
 
+  const getSelectedRole = useCallback(async () => {
+    try {
+      setLoadingPageHeader(true);
+
+      if (!id || isNaN(+id)) {
+        setSelectedRole(null);
+        return;
+      }
+
+      const role = await Role.getRole(+id);
+
+      const preparedPath = preparePathname(router.pathname, id);
+
+      const [key, value] = [preparedPath, role.name];
+      const [keyForEdit, valueForEdit] = [
+        `${preparedPath}/edit-role`,
+        EDIT_ROLE,
+      ];
+
+      const newBreadcrumbRecords: Record<string, string> = {};
+
+      newBreadcrumbRecords[key] = value;
+      newBreadcrumbRecords[keyForEdit] = valueForEdit;
+
+      setBreadcrumbNameMap((curMap) => ({
+        ...curMap,
+        ...newBreadcrumbRecords,
+      }));
+
+      setSelectedRole(role);
+    } catch (err: any) {
+      console.error(err);
+      showErrorNotification(err.message);
+    } finally {
+      setLoadingPageHeader(false);
+    }
+  }, [id, router]);
+
   useEffect(() => {
-    getSelectedUser();
-  }, [getSelectedUser]);
+    if (router.pathname.includes('users')) {
+      getSelectedUser();
+    }
+
+    if (router.pathname.includes('role-management')) {
+      getSelectedRole();
+    }
+  }, [router, getSelectedUser, getSelectedRole]);
 
   return (
     <PageHeaderContext.Provider
       value={{
         breadcrumbNameMap,
-        selectedUser,
         loadingPageHeader,
+        selectedUser,
         getSelectedUser,
+        selectedRole,
+        getSelectedRole,
         rolePageHeaderBtnsClick,
         setRolePageHeaderBtnsClick,
       }}
