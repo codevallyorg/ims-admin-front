@@ -4,7 +4,7 @@ import { FC, useCallback, useEffect, useState } from 'react';
 import { Empty, Table } from 'antd';
 
 import User from '@/services/user';
-import { UserStatus, UserType } from '@/types/entities/IUser';
+import { IUser, UserStatus, UserType } from '@/types/entities/IUser';
 import {
   OrderByEnum,
   OrderEnum,
@@ -40,23 +40,14 @@ import Exclamation from '@/icons/Exclamation';
 import EmptyText from '@/components/ui/empty-text/EmptyText';
 import Role from '@/services/role';
 
-export interface UserTableDataType {
-  key: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  roleName: string;
-  status: string;
-  updatedAt: string;
-}
-
 type UsersTableProps = {
-  userType: UserType;
+  userType?: UserType;
+  isViewRole?: boolean;
 };
 
-const UsersTable: FC<UsersTableProps> = ({ userType }) => {
+const UsersTable: FC<UsersTableProps> = ({ userType, isViewRole }) => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [users, setUsers] = useState<UserTableDataType[]>([]);
+  const [users, setUsers] = useState<IUser[]>([]);
   const [pageMeta, setPageMeta] = useState<PageMeta>();
   const [possibleTotalUsers, setPossibleTotalUsers] = useState<number>(0);
   const [popconfirmSubmitting, setPopconfirmSubmitting] =
@@ -73,13 +64,13 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
 
     const queryProps: PaginationOptions = {};
 
-    if (page && (filterByType || isArchivedDashboard)) return;
+    if (page && (!userType || filterByType || isArchivedDashboard)) return;
 
     if (!page) {
       queryProps.page = 1;
     }
 
-    if (!filterByType && !isArchivedDashboard) {
+    if (userType && !filterByType && !isArchivedDashboard) {
       queryProps.filterByType =
         userType === UserType.Portal ? UserType.Portal : UserType.TDR;
     }
@@ -93,7 +84,7 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
 
       const { page, filterByType } = router.query;
 
-      if (!page || (!isArchivedDashboard && !filterByType)) {
+      if (!page || (userType && !isArchivedDashboard && !filterByType)) {
         return;
       }
 
@@ -102,11 +93,6 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
         isArchivedDashboard,
       );
 
-      // TO DELETE
-      for (const user of users) {
-        user.key = user.id;
-      }
-
       setUsers(users);
       setPageMeta(meta);
     } catch (err: any) {
@@ -114,7 +100,7 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     } finally {
       setLoading(false);
     }
-  }, [router, isArchivedDashboard]);
+  }, [router, userType, isArchivedDashboard]);
 
   useEffect(() => {
     loadAllUsers();
@@ -260,11 +246,11 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     router.replace({ query: { ...router.query, search } });
   };
 
-  const onUnarchive = async (user: UserTableDataType) => {
+  const onUnarchive = async (user: IUser) => {
     try {
       setPopconfirmSubmitting(true);
 
-      const response = await User.toggleArchiveUserProfile(user.key);
+      const response = await User.toggleArchiveUserProfile(user.id);
 
       if (!response.success) {
         throw new Error('Something went wrong');
@@ -289,8 +275,8 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     }
   };
 
-  let name, inviteButtonLabel;
-  let [viewButtonLabel, onSelectRole]: [
+  let name, primaryButtonLabel;
+  let [secondaryButtonLabel, onSelectRole]: [
     undefined | string,
     undefined | ((props: any) => void),
   ] = ['View Report', onSelectRoleItem];
@@ -298,26 +284,31 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
   switch (userType) {
     case UserType.Portal:
       name = PORTAL_USERS;
-      inviteButtonLabel = INVITE_NEW_PORTAL_USER;
+      primaryButtonLabel = INVITE_NEW_PORTAL_USER;
       break;
 
     case UserType.TDR:
       name = TDR_USERS;
-      inviteButtonLabel = INVITE_NEW_TDR_USER;
+      primaryButtonLabel = INVITE_NEW_TDR_USER;
       break;
 
     case UserType.Archived:
       name = ARCHIVED_USERS;
-      viewButtonLabel = undefined;
-      inviteButtonLabel = undefined;
+      secondaryButtonLabel = undefined;
+      primaryButtonLabel = undefined;
       onSelectRole = undefined;
       break;
+
+    default:
+      primaryButtonLabel = 'Assign Users';
+      secondaryButtonLabel = 'Un-assign Users';
   }
 
   const toolbarProps: TableToolbarProps = {
     name,
-    secondaryButtonLabel: viewButtonLabel,
-    primaryButtonLabel: inviteButtonLabel,
+    secondaryButtonLabel,
+    primaryButtonLabel,
+    isViewRole,
     roleOptions,
     onSelectRole,
     onClickPrimary: onClickInvite,
@@ -328,8 +319,12 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
     return (
       <Empty image={<Exclamation />} description={false}>
         <EmptyText>
-          No user have been {isArchivedDashboard ? 'archived' : 'registered'}{' '}
-          yet.
+          No user have been{' '}
+          {isViewRole
+            ? 'assigned to this Role.'
+            : isArchivedDashboard
+            ? 'archived yet.'
+            : 'registered yet.'}
         </EmptyText>
       </Empty>
     );
@@ -351,6 +346,7 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
         loading={loading}
         rowClassName={styles.row}
         onChange={columnActionsHandler}
+        rowKey={(record) => record.id}
         pagination={{
           responsive: true,
           hideOnSinglePage:
@@ -358,15 +354,15 @@ const UsersTable: FC<UsersTableProps> = ({ userType }) => {
           current: +typeCastQueryToString(router.query.page) || 1,
           total: possibleTotalUsers,
         }}
-        onRow={({ key }) => {
+        onRow={(record) => {
           return {
             onClick: () => {
               const subUrl =
-                userType === UserType.Portal
+                record.type === UserType.Portal
                   ? ROUTE_DASHBOARD_PORTAL_USERS
                   : ROUTE_DASHBOARD_TDR_USERS;
 
-              router.push(`${subUrl}/${key}`);
+              router.push(`${subUrl}/${record.id}`);
             },
           };
         }}

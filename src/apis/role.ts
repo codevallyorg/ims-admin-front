@@ -13,3 +13,7 @@ export const createRole = (payload: CreateRolePayload) => {
 export const getAllRoles = () => {
   return axiosInstance.get(endpointUrl('roles'));
 };
+
+export const getRole = (id: number) => {
+  return axiosInstance.get(endpointUrl(`roles/${id}`));
+};

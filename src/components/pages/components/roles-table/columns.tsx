@@ -1,17 +1,10 @@
 import { ColumnsType } from 'antd/lib/table';
 import { NextRouter } from 'next/router';
 
-import { UserType } from '@/types/entities/IUser';
-import {
-  ROUTE_DASHBOARD_PORTAL_USERS,
-  ROUTE_DASHBOARD_TDR_USERS,
-} from '@/utils/constants';
 import { OrderByEnum, OrderEnum } from '@/types/payloads/pagination';
-import { UserTableDataType } from './RolesTable';
+import { IUser } from '@/types/entities/IUser';
 
-export const getColumns = (
-  router: NextRouter,
-): ColumnsType<UserTableDataType> => {
+export const getColumns = (router: NextRouter): ColumnsType<IUser> => {
   const { orderBy, order } = router.query;
 
   return [

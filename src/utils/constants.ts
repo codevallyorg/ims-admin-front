@@ -40,6 +40,7 @@ export const ADMIN_PORTAL_SETTINGS = 'Admin Portal Settings';
 export const ROLE_MANAGEMENT = 'Role Management';
 export const GENERAL = 'General';
 export const PERMISSIONS = 'Permissions';
+export const EDIT_ROLE = 'Edit Role';
 
 export const defaultStyle = {
   margin: '20px 24px',

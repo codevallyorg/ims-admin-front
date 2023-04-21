@@ -26,6 +26,7 @@ import {
   ROUTE_INVITE_NEW_TDR_USER,
   ROUTE_ROLE_MANAGEMENT,
   TDR_USERS,
+  USERS,
 } from '@/utils/constants';
 import { EllipsisOutlined } from '@ant-design/icons';
 import Button from '@/components/ui/button/Button';
@@ -42,10 +43,10 @@ import {
   onToggleUserProfileLock,
 } from './helpers';
 import {
-  createRoleTabItems,
   getDrowdownItems,
   tdrUserTabItems,
   usersTabItems,
+  viewRoleTabItems,
 } from './tabs';
 
 const inviteFooter = (
@@ -71,6 +72,7 @@ const PageHeader: React.FC = () => {
     breadcrumbNameMap,
     selectedUser,
     getSelectedUser,
+    selectedRole,
     rolePageHeaderBtnsClick,
   } = usePageHeaderContext();
   const router = useRouter();
@@ -127,11 +129,15 @@ const PageHeader: React.FC = () => {
     [router],
   );
 
-  const onCreateRoleTabChange = useCallback(
+  const onRoleTabChange = useCallback(
     (activeKey: string) => {
       switch (activeKey) {
         case GENERAL:
           router.replace({ query: { ...router.query, tab: GENERAL } });
+          break;
+
+        case USERS:
+          router.replace({ query: { ...router.query, tab: USERS } });
           break;
 
         case PERMISSIONS:
@@ -170,7 +176,11 @@ const PageHeader: React.FC = () => {
       setFooter(<div style={{ paddingBottom: 1 }} />);
       return;
     }
-    if (id && !preparedPath.includes('edit-user-profile')) {
+    if (
+      id &&
+      preparedPath.includes('users') &&
+      !preparedPath.includes('edit-user-profile')
+    ) {
       // TODO - add last audit log of the selected user
       setFooter(
         <>
@@ -196,12 +206,19 @@ const PageHeader: React.FC = () => {
       return;
     }
 
-    if (preparedPath === ROUTE_CREATE_NEW_ROLE) {
+    if (
+      preparedPath === ROUTE_CREATE_NEW_ROLE ||
+      preparedPath.includes(ROUTE_ROLE_MANAGEMENT)
+    ) {
       setFooter(
         <Tabs
           defaultActiveKey={typeCastQueryToString(tab)}
-          items={createRoleTabItems}
-          onChange={onCreateRoleTabChange}
+          items={
+            selectedRole
+              ? viewRoleTabItems
+              : [viewRoleTabItems[0], viewRoleTabItems[2]]
+          }
+          onChange={onRoleTabChange}
         />,
       );
       return;
@@ -217,11 +234,12 @@ const PageHeader: React.FC = () => {
   }, [
     id,
     pathname,
+    selectedRole,
     tab,
     breadcrumbNameMap,
     onUsersTabChange,
     onTDRUserTabChange,
-    onCreateRoleTabChange,
+    onRoleTabChange,
   ]);
 
   const onClickEdit = () => {

@@ -12,6 +12,7 @@ import {
   TDR_USERS,
   UNARCHIVE,
   UNLOCK_PROFILE,
+  USERS,
 } from '@/utils/constants';
 
 export const usersTabItems = [
@@ -26,8 +27,9 @@ export const tdrUserTabItems = [
   { label: CARD_STOCK, key: CARD_STOCK },
 ];
 
-export const createRoleTabItems = [
+export const viewRoleTabItems = [
   { label: GENERAL, key: GENERAL },
+  { label: USERS, key: USERS },
   { label: PERMISSIONS, key: PERMISSIONS },
 ];
 

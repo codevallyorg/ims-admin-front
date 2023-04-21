@@ -2,14 +2,15 @@ import { Switch } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { Dispatch, SetStateAction } from 'react';
 import { IAction } from '@/types/entities/IAction';
-import { RoleActions } from '@/types/payloads/role';
+import { RoleActionsPayload } from '@/types/payloads/role';
 
 export const getColumns = (
   columnTitle: string,
-  actionsPermitted: Record<number, RoleActions | undefined>,
+  actionsPermitted: Record<number, RoleActionsPayload | undefined>,
   setActionsPermitted: Dispatch<
-    SetStateAction<Record<number, RoleActions | undefined>>
+    SetStateAction<Record<number, RoleActionsPayload | undefined>>
   >,
+  readOnly?: boolean,
 ): ColumnsType<IAction> => {
   const onPermissionChange = (checked: boolean, actionId: number) => {
     if (!checked) {
@@ -47,9 +48,15 @@ export const getColumns = (
       dataIndex: 'id',
       key: 'id',
       width: 100,
-      render: (actionId: number) => (
-        <Switch onChange={(checked) => onPermissionChange(checked, actionId)} />
-      ),
+      render: (actionId: number) => {
+        return (
+          <Switch
+            checked={!!actionsPermitted[actionId]}
+            onChange={(checked) => onPermissionChange(checked, actionId)}
+            disabled={readOnly}
+          />
+        );
+      },
     },
     {
       title: 'Approval',
@@ -58,8 +65,11 @@ export const getColumns = (
       width: 100,
       render: (_, record: IAction) => (
         <Switch
+          checked={actionsPermitted[record.id]?.needsApproval}
           onChange={(checked) => onApprovalChange(checked, record.id)}
-          disabled={actionsPermitted[record.id] ? false : true}
+          disabled={
+            readOnly !== undefined ? readOnly : !!!actionsPermitted[record.id]
+          }
         />
       ),
     },

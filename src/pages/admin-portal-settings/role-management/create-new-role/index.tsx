@@ -8,7 +8,7 @@ import {
   showErrorNotification,
   showNotification,
 } from '@/utils/general';
-import { CreateRolePayload, RoleActions } from '@/types/payloads/role';
+import { CreateRolePayload } from '@/types/payloads/role';
 import Role from '@/services/role';
 import { useRouter } from 'next/router';
 import {
@@ -21,6 +21,7 @@ import { PRIMARY_BLUE } from '@/utils/colors';
 import Private from '@/components/layout/Private';
 import { withLayout } from '@/components/layout/utils';
 import Loader from '@/components/ui/loader/Loader';
+import { RoleSelectOptions } from '@/types/entities/IRole';
 
 export const initialRole = {
   name: '',
@@ -28,99 +29,115 @@ export const initialRole = {
 };
 
 const CreateNewRole: FC = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [createRoleData, setCreateRoleData] =
-    useState<CreateRolePayload>(initialRole);
-  const [categorisedActions, setCategorisedActions] =
-    useState<CategorisedActions>({});
-  const [actionsPermitted, setActionsPermitted] = useState<
-    Record<number, RoleActions | undefined>
-  >({});
+  // const [loading, setLoading] = useState<boolean>(true);
+  // const [roleSelectOptions, setRoleSelectOptions] = useState<
+  //   RoleSelectOptions[]
+  // >([]);
+  // const [createRoleData, setCreateRoleData] =
+  //   useState<CreateRolePayload>(initialRole);
+  // const [categorisedActions, setCategorisedActions] =
+  //   useState<CategorisedActions>({});
+  // const [actionsPermitted, setActionsPermitted] = useState<
+  //   Record<number, RoleActions | undefined>
+  // >({});
 
-  const router = useRouter();
-  const { tab } = router.query;
+  // const router = useRouter();
+  // const { tab } = router.query;
 
-  const onSubmit = useCallback(
-    async (data: CreateRolePayload) => {
-      try {
-        const actions: RoleActions[] = [];
+  // const onSubmit = useCallback(
+  //   async (data: CreateRolePayload) => {
+  //     try {
+  //       const actions: RoleActions[] = [];
 
-        for (const key in actionsPermitted) {
-          if (actionsPermitted[key] === undefined) return;
+  //       for (const key in actionsPermitted) {
+  //         if (actionsPermitted[key] === undefined) return;
 
-          // @ts-ignore
-          actions.push(actionsPermitted[key]);
-        }
+  //         // @ts-ignore
+  //         actions.push(actionsPermitted[key]);
+  //       }
 
-        data.actions = actions;
+  //       data.actions = actions;
 
-        const newRole = await Role.createRole(data);
+  //       const newRole = await Role.createRole(data);
 
-        if (!newRole?.createdAt) {
-          throw new Error(
-            'We were unable to save your New Role. Please try again.',
-          );
-        }
+  //       if (!newRole?.createdAt) {
+  //         throw new Error(
+  //           'We were unable to save your New Role. Please try again.',
+  //         );
+  //       }
 
-        const message = 'New Role Created';
-        const description = `${data.name} was successfully created!`;
-        const icon = <CheckCircleOutlined style={{ color: PRIMARY_BLUE }} />;
+  //       const message = 'New Role Created';
+  //       const description = `${data.name} was successfully created!`;
+  //       const icon = <CheckCircleOutlined style={{ color: PRIMARY_BLUE }} />;
 
-        showNotification({ message, description, icon });
-        router.push(ROUTE_ROLE_MANAGEMENT);
-      } catch (err: any) {
-        console.error(err);
-        showErrorNotification(err);
-      }
-    },
-    [router, actionsPermitted],
-  );
+  //       showNotification({ message, description, icon });
+  //       router.push(ROUTE_ROLE_MANAGEMENT);
+  //     } catch (err: any) {
+  //       console.error(err);
+  //       showErrorNotification(err);
+  //     }
+  //   },
+  //   [router, actionsPermitted],
+  // );
 
-  useEffect(() => {
-    if (tab) return;
+  // useEffect(() => {
+  //   if (tab) return;
 
-    router.replace({ query: { ...router.query, tab: GENERAL } });
-  }, [tab, router]);
+  //   router.replace({ query: { ...router.query, tab: GENERAL } });
+  // }, [tab, router]);
 
-  useEffect(() => {
-    const loadAllActions = async () => {
-      try {
-        setLoading(true);
-        const actions = await Action.getAllActions();
+  // useEffect(() => {
+  //   const loadAllActions = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const actions = await Action.getAllActions();
 
-        const categorisedActions = getCategorisedActions(actions);
+  //       const categorisedActions = getCategorisedActions(actions);
 
-        setCategorisedActions(categorisedActions);
-      } catch (err: any) {
-        console.error(err);
-        showErrorNotification(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       setCategorisedActions(categorisedActions);
+  //     } catch (err: any) {
+  //       console.error(err);
+  //       showErrorNotification(err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    loadAllActions();
-  }, []);
+  //   const loadRoleOptions = async () => {
+  //     try {
+  //       const roleOptions = await Role.getRoleSelectOptions();
+  //       setRoleSelectOptions(roleOptions);
+  //     } catch (err: any) {
+  //       console.error(err);
+  //     }
+  //   };
 
-  if (loading) {
-    return <Loader />;
-  }
+  //   loadAllActions();
+  //   loadRoleOptions();
+  // }, []);
 
-  return tab === GENERAL ? (
-    <div style={defaultStyle}>
-      <RoleForm
-        onSubmit={onSubmit}
-        defaultValues={createRoleData}
-        setCreateRoleData={setCreateRoleData}
-      />
-    </div>
-  ) : (
-    <Permissions
-      categorisedActions={categorisedActions}
-      actionsPermitted={actionsPermitted}
-      setActionsPermitted={setActionsPermitted}
-    />
-  );
+  // if (loading) {
+  //   return <Loader />;
+  // }
+
+  // return tab === GENERAL ? (
+  //   <div style={defaultStyle}>
+  //     <RoleForm
+  //       roleSelectOptions={roleSelectOptions}
+  //       onSubmit={onSubmit}
+  //       defaultValues={createRoleData}
+  //       setCreateRoleData={setCreateRoleData}
+  //     />
+  //   </div>
+  // ) : (
+  //   <Permissions
+  //     categorisedActions={categorisedActions}
+  //     actionsPermitted={actionsPermitted}
+  //     setActionsPermitted={setActionsPermitted}
+  //   />
+  // );
+
+  return <RoleForm />;
 };
 
 export default withLayout(CreateNewRole, Private);
