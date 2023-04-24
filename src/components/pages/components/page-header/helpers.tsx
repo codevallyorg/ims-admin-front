@@ -4,21 +4,29 @@ import { IUser } from '@/types/entities/IUser';
 import { showErrorNotification, showNotification } from '@/utils/general';
 import { PRIMARY_BLUE } from '@/utils/colors';
 import {
+  CheckCircleOutlined,
   LockOutlined,
   MailOutlined,
   SyncOutlined,
   UnlockOutlined,
   UserDeleteOutlined,
 } from '@ant-design/icons';
+import Role from '@/services/role';
+import { IRole } from '@/types/entities/IRole';
+import { NextRouter } from 'next/router';
+import { ROUTE_ROLE_MANAGEMENT } from '@/utils/constants';
 
 type commonProps = {
   id: string | string[] | undefined;
   selectedUser: IUser | null;
+  selectedRole: IRole | null;
+  router: NextRouter;
   setLoading: Dispatch<SetStateAction<boolean>>;
   setOpenResetPasswordModal: Dispatch<SetStateAction<boolean>>;
   getSelectedUser: () => void;
   setOpenToggleArchiveUserModal: Dispatch<SetStateAction<boolean>>;
   setOpenToggleUserProfileLockModal: Dispatch<SetStateAction<boolean>>;
+  setOpenArchiveRoleModal: Dispatch<SetStateAction<boolean>>;
 };
 
 export const onSendResetPassword = async ({
@@ -141,6 +149,44 @@ export const onToggleUserProfileLock = async ({
     showErrorNotification(err);
   } finally {
     setOpenToggleUserProfileLockModal(false);
+    setLoading(false);
+  }
+};
+
+export const onArchiveRole = async ({
+  id,
+  setLoading,
+  selectedRole,
+  router,
+  setOpenArchiveRoleModal,
+}: commonProps) => {
+  try {
+    if (!id || isNaN(+id)) return;
+
+    setLoading(true);
+
+    const response = await Role.archiveRole(+id);
+
+    if (!response.archived) {
+      throw new Error('Something went wrong');
+    }
+
+    router.push(ROUTE_ROLE_MANAGEMENT);
+
+    const message = `Role Archived`;
+    const description = `${selectedRole?.name} was successfully archived!`;
+    const icon = <CheckCircleOutlined style={{ color: PRIMARY_BLUE }} />;
+
+    showNotification({
+      message,
+      description,
+      icon,
+    });
+  } catch (err: any) {
+    console.error(err);
+    showErrorNotification(err);
+  } finally {
+    setOpenArchiveRoleModal(false);
     setLoading(false);
   }
 };

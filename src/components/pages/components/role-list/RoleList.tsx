@@ -7,10 +7,10 @@ import { IRole } from '@/types/entities/IRole';
 import { showErrorNotification } from '@/utils/general';
 import { CHARACTER_SECONDARY } from '@/utils/colors';
 import { AntDesignOutlined, UserOutlined } from '@ant-design/icons';
-import styles from './RoleCard.module.css';
+import styles from './RoleList.module.css';
 import { ROUTE_ROLE_MANAGEMENT } from '@/utils/constants';
 
-const RoleCard: FC = () => {
+const RoleList: FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [roles, setRoles] = useState<IRole[]>([]);
 
@@ -103,4 +103,4 @@ const RoleCard: FC = () => {
   );
 };
 
-export default RoleCard;
+export default RoleList;
