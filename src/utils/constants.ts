@@ -42,6 +42,10 @@ export const GENERAL = 'General';
 export const PERMISSIONS = 'Permissions';
 export const EDIT_ROLE = 'Edit Role';
 
+// Notifications Layout
+export const ALL_UNREAD = 'All unread';
+export const READ = 'Read';
+
 export const defaultStyle = {
   margin: '20px 24px',
   padding: 24,
