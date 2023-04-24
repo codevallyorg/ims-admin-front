@@ -1,4 +1,5 @@
 import {
+  archiveRole,
   createRole,
   editRole,
   getAllRoles,
@@ -30,6 +31,11 @@ export default class Role {
 
   static async editRole(id: number, payload: EditRolePayload) {
     const { data } = await editRole(id, payload);
+    return data;
+  }
+
+  static async archiveRole(id: number) {
+    const { data } = await archiveRole(id);
     return data;
   }
 }

@@ -21,3 +21,7 @@ export const getRole = (id: number) => {
 export const editRole = (id: number, payload: EditRolePayload) => {
   return axiosInstance.patch(endpointUrl(`roles/${id}`), payload);
 };
+
+export const archiveRole = (id: number) => {
+  return axiosInstance.patch(endpointUrl(`roles/archive/${id}`));
+};

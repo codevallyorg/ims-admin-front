@@ -1,8 +1,8 @@
 import { FC } from 'react';
-import Button from '@/components/ui/button/Button';
-import RoleCard from '../role-card/RoleCard';
-import styles from './RoleHeader.module.css';
 import Link from 'next/link';
+import Button from '@/components/ui/button/Button';
+import RoleList from '../role-list/RoleList';
+import styles from './RoleHeader.module.css';
 import { ROUTE_CREATE_NEW_ROLE } from '@/utils/constants';
 
 const RoleHeader: FC = () => {
@@ -18,7 +18,7 @@ const RoleHeader: FC = () => {
         </span>
       </header>
 
-      <RoleCard />
+      <RoleList />
     </div>
   );
 };

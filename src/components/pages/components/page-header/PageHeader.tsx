@@ -13,8 +13,6 @@ import {
   ASSIGNED_AGENTS,
   CARD_STOCK,
   GENERAL,
-  INVITE_NEW_PORTAL_USER,
-  INVITE_NEW_TDR_USER,
   PERMISSIONS,
   PORTAL_USERS,
   PROFILE,
@@ -22,8 +20,6 @@ import {
   ROUTE_DASHBOARD_ARCHIVED_USERS,
   ROUTE_DASHBOARD_PORTAL_USERS,
   ROUTE_DASHBOARD_TDR_USERS,
-  ROUTE_INVITE_NEW_PORTAL_USER,
-  ROUTE_INVITE_NEW_TDR_USER,
   ROUTE_ROLE_MANAGEMENT,
   TDR_USERS,
   USERS,
@@ -38,6 +34,7 @@ import ResetPasswordModal from '../../modals/reset-password/ResetPasswordModal';
 import { NEUTRAL_5 } from '@/utils/colors';
 import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
 import {
+  onArchiveRole,
   onSendResetPassword,
   onToggleArchiveUserProfile,
   onToggleUserProfileLock,
@@ -48,6 +45,7 @@ import {
   usersTabItems,
   viewRoleTabItems,
 } from './tabs';
+import ArchiveRoleModal from '../../modals/archive-role/ArchiveRoleModal';
 
 const inviteFooter = (
   <div style={{ paddingBottom: 14 }}>
@@ -66,6 +64,8 @@ const PageHeader: React.FC = () => {
   const [openToggleArchiveUserModal, setOpenToggleArchiveUserModal] =
     useState<boolean>(false);
   const [openToggleUserProfileLockModal, setOpenToggleUserProfileLockModal] =
+    useState<boolean>(false);
+  const [openArchiveRoleModal, setOpenArchiveRoleModal] =
     useState<boolean>(false);
 
   const {
@@ -267,11 +267,14 @@ const PageHeader: React.FC = () => {
   const commonArgs = {
     id,
     selectedUser,
+    selectedRole,
+    router,
     setLoading,
     setOpenResetPasswordModal,
     getSelectedUser,
     setOpenToggleArchiveUserModal,
     setOpenToggleUserProfileLockModal,
+    setOpenArchiveRoleModal,
   };
 
   const resetPasswordModalProps = {
@@ -293,6 +296,14 @@ const PageHeader: React.FC = () => {
     open: openToggleUserProfileLockModal,
     onSubmit: onToggleUserProfileLock.bind(this, commonArgs),
     onCancel: () => setOpenToggleUserProfileLockModal(false),
+  };
+
+  const archiveRoleModalProps = {
+    loading,
+    roleName: selectedRole ? selectedRole.name : '',
+    open: openArchiveRoleModal,
+    onSubmit: onArchiveRole.bind(this, commonArgs),
+    onCancel: () => setOpenArchiveRoleModal(false),
   };
 
   return (
@@ -320,6 +331,17 @@ const PageHeader: React.FC = () => {
               >
                 Save
               </Button>,
+            ]
+          : router.pathname.includes('role-management/[id]') &&
+            !router.pathname.includes('edit-role')
+          ? [
+              <Button key="0" onClick={onClickEdit}>
+                Edit
+              </Button>,
+              <Button key="1" onClick={() => setOpenArchiveRoleModal(true)}>
+                Archive
+              </Button>,
+              <ArchiveRoleModal key="2" {...archiveRoleModalProps} />,
             ]
           : router.pathname.includes('[id]') &&
             !router.pathname.includes('edit-user-profile') && [
