@@ -26,6 +26,7 @@ import {
   ROLE_MANAGEMENT,
   CREATE_NEW_ROLE,
   EDIT_ROLE,
+  ROUTE_ROLE_MANAGEMENT,
 } from '@/utils/constants';
 import { preparePathname, showErrorNotification } from '@/utils/general';
 import User from '@/services/user';
@@ -156,13 +157,12 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
 
       const role = await Role.getRole(+id);
 
-      const preparedPath = preparePathname(router.pathname, id);
+      setSelectedRole(role);
 
-      const [key, value] = [preparedPath, role.name];
-      const [keyForEdit, valueForEdit] = [
-        `${preparedPath}/edit-role`,
-        EDIT_ROLE,
-      ];
+      const route = `${ROUTE_ROLE_MANAGEMENT}/${id}`;
+
+      const [key, value] = [route, role.name];
+      const [keyForEdit, valueForEdit] = [`${route}/edit-role`, EDIT_ROLE];
 
       const newBreadcrumbRecords: Record<string, string> = {};
 
@@ -173,15 +173,13 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
         ...curMap,
         ...newBreadcrumbRecords,
       }));
-
-      setSelectedRole(role);
     } catch (err: any) {
       console.error(err);
       showErrorNotification(err.message);
     } finally {
       setLoadingPageHeader(false);
     }
-  }, [id, router]);
+  }, [id]);
 
   useEffect(() => {
     if (router.pathname.includes('users')) {
