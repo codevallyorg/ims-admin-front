@@ -1,0 +1,9 @@
+.notificationContainer {
+  display: flex;
+  gap: 15px;
+}
+
+.message {
+  font-size: 12px;
+  font-weight: 400;
+}

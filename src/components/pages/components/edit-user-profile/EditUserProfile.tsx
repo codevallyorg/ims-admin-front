@@ -18,6 +18,7 @@ import { PRIMARY_BLUE } from '@/utils/colors';
 import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
 import { UserType } from '@/types/entities/IUser';
 import TDRUserForm from '../../forms/tdr-user/TDRUserForm';
+import { useAuthContext } from '@/contexts/AuthProvider';
 
 type EditUserProfileProps = {
   userType: UserType;
@@ -26,6 +27,7 @@ type EditUserProfileProps = {
 const EditUserProfile: FC<EditUserProfileProps> = ({ userType }) => {
   const [submitting, setSubmitting] = useState<boolean>(false);
 
+  const { user, getUser } = useAuthContext();
   const { loadingPageHeader, selectedUser, getSelectedUser } =
     usePageHeaderContext();
   const router = useRouter();
@@ -39,6 +41,8 @@ const EditUserProfile: FC<EditUserProfileProps> = ({ userType }) => {
       await User.editUser(+selectedUser.id, data);
 
       getSelectedUser();
+
+      if (user?.id === selectedUser.id) getUser();
 
       const url =
         userType === UserType.Portal
