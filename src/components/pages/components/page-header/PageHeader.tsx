@@ -6,17 +6,28 @@ import {
   Tabs,
 } from 'antd';
 import { useRouter } from 'next/router';
-import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import {
   ARCHIVED_USERS,
   ASSIGNED_AGENTS,
   CARD_STOCK,
+  CREATE_NEW_ROLE,
+  EDIT_ROLE,
+  EDIT_USER_PROFILE,
   GENERAL,
+  INVITE_NEW_PORTAL_USER,
+  INVITE_NEW_TDR_USER,
   PERMISSIONS,
   PORTAL_USERS,
   PROFILE,
-  ROUTE_CREATE_NEW_ROLE,
+  ROLE_MANAGEMENT,
   ROUTE_DASHBOARD_ARCHIVED_USERS,
   ROUTE_DASHBOARD_PORTAL_USERS,
   ROUTE_DASHBOARD_TDR_USERS,
@@ -46,6 +57,7 @@ import {
   viewRoleTabItems,
 } from './tabs';
 import ArchiveRoleModal from '../../modals/archive-role/ArchiveRoleModal';
+import { UserType } from '@/types/entities/IUser';
 
 const inviteFooter = (
   <div style={{ paddingBottom: 14 }}>
@@ -55,8 +67,9 @@ const inviteFooter = (
 );
 
 const PageHeader: React.FC = () => {
-  const [title, setTitle] = useState<string>();
+  const [title, setTitle] = useState<string>('');
   const [footer, setFooter] = useState<ReactNode>();
+  const [buttonsOnRight, setButtonsOnRight] = useState<ReactNode[]>();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [openResetPasswordModal, setOpenResetPasswordModal] =
@@ -148,102 +161,7 @@ const PageHeader: React.FC = () => {
     [router],
   );
 
-  useEffect(() => {
-    const preparedPath = id ? preparePathname(pathname, id) : pathname;
-
-    const defaultUsersTab =
-      pathname === ROUTE_DASHBOARD_ARCHIVED_USERS
-        ? ARCHIVED_USERS
-        : pathname === ROUTE_DASHBOARD_TDR_USERS
-        ? TDR_USERS
-        : PORTAL_USERS;
-
-    const defaultTDRUserTab = typeCastQueryToString(tab) || PROFILE;
-
-    const title = breadcrumbNameMap[preparedPath];
-
-    setTitle(title);
-
-    if (preparedPath.includes('invite-new')) {
-      setFooter(inviteFooter);
-      return;
-    }
-
-    if (
-      preparedPath.includes('edit-user-profile') ||
-      preparedPath === ROUTE_ROLE_MANAGEMENT
-    ) {
-      setFooter(<div style={{ paddingBottom: 1 }} />);
-      return;
-    }
-    if (
-      id &&
-      preparedPath.includes('users') &&
-      !preparedPath.includes('edit-user-profile')
-    ) {
-      // TODO - add last audit log of the selected user
-      setFooter(
-        <>
-          <div style={{ paddingBottom: 12 }}>
-            <Space>
-              <Badge color={NEUTRAL_5} />
-              <span>Logged out</span>
-            </Space>
-          </div>
-
-          {preparedPath.includes(ROUTE_DASHBOARD_TDR_USERS) ? (
-            <Tabs
-              defaultActiveKey={defaultTDRUserTab}
-              onChange={onTDRUserTabChange}
-              items={tdrUserTabItems}
-            />
-          ) : (
-            <div style={{ paddingBottom: 4 }} />
-          )}
-        </>,
-      );
-
-      return;
-    }
-
-    if (
-      preparedPath === ROUTE_CREATE_NEW_ROLE ||
-      preparedPath.includes(ROUTE_ROLE_MANAGEMENT)
-    ) {
-      setFooter(
-        <Tabs
-          activeKey={typeCastQueryToString(tab)}
-          items={
-            preparedPath === ROUTE_CREATE_NEW_ROLE ||
-            preparedPath.includes('edit-role')
-              ? [viewRoleTabItems[0], viewRoleTabItems[2]]
-              : viewRoleTabItems
-          }
-          onChange={onRoleTabChange}
-        />,
-      );
-      return;
-    }
-
-    setFooter(
-      <Tabs
-        defaultActiveKey={defaultUsersTab}
-        onChange={onUsersTabChange}
-        items={usersTabItems}
-      />,
-    );
-  }, [
-    id,
-    pathname,
-    selectedRole,
-    tab,
-    breadcrumbNameMap,
-    onUsersTabChange,
-    onTDRUserTabChange,
-    onRoleTabChange,
-  ]);
-
-  const onClickEdit = () => {
+  const onClickEdit = useCallback(() => {
     const preparedRoute = router.pathname.replace(
       '[id]',
       typeCastQueryToString(router.query.id),
@@ -254,7 +172,7 @@ const PageHeader: React.FC = () => {
       : 'edit-user-profile';
 
     router.push(`${preparedRoute}/${endpoint}`);
-  };
+  }, [router]);
 
   const onClickDropdownItem = (info: any) => {
     if (+info.key === 0) {
@@ -264,47 +182,212 @@ const PageHeader: React.FC = () => {
     }
   };
 
-  const commonArgs = {
-    id,
+  const commonArgs = useMemo(
+    () => ({
+      id,
+      selectedUser,
+      selectedRole,
+      router,
+      setLoading,
+      setOpenResetPasswordModal,
+      getSelectedUser,
+      setOpenToggleArchiveUserModal,
+      setOpenToggleUserProfileLockModal,
+      setOpenArchiveRoleModal,
+    }),
+    [id, selectedUser, selectedRole, router, getSelectedUser],
+  );
+
+  const resetPasswordModalProps = useMemo(
+    () => ({
+      loading,
+      open: openResetPasswordModal,
+      onSend: onSendResetPassword.bind(this, commonArgs),
+      onCancel: () => setOpenResetPasswordModal(false),
+    }),
+    [commonArgs, loading, openResetPasswordModal],
+  );
+
+  const toggleArchiveUserModalProps = useMemo(
+    () => ({
+      loading,
+      open: openToggleArchiveUserModal,
+      onArchive: onToggleArchiveUserProfile.bind(this, commonArgs),
+      onCancel: () => setOpenToggleArchiveUserModal(false),
+    }),
+    [commonArgs, loading, openToggleArchiveUserModal],
+  );
+
+  const toggleUserProfileLockModalProps = useMemo(
+    () => ({
+      loading,
+      open: openToggleUserProfileLockModal,
+      onSubmit: onToggleUserProfileLock.bind(this, commonArgs),
+      onCancel: () => setOpenToggleUserProfileLockModal(false),
+    }),
+    [commonArgs, loading, openToggleUserProfileLockModal],
+  );
+
+  const archiveRoleModalProps = useMemo(
+    () => ({
+      loading,
+      roleName: selectedRole ? selectedRole.name : '',
+      open: openArchiveRoleModal,
+      onSubmit: onArchiveRole.bind(this, commonArgs),
+      onCancel: () => setOpenArchiveRoleModal(false),
+    }),
+    [commonArgs, loading, selectedRole, openArchiveRoleModal],
+  );
+
+  useEffect(() => {
+    const preparedPath = id ? preparePathname(pathname, id) : pathname;
+
+    const title = breadcrumbNameMap[preparedPath];
+
+    setTitle(title);
+  }, [id, breadcrumbNameMap, pathname]);
+
+  useEffect(() => {
+    const isUsersDashboardPage = [
+      PORTAL_USERS,
+      TDR_USERS,
+      ARCHIVED_USERS,
+    ].includes(title);
+    const isInviteNewUserPage = [
+      INVITE_NEW_TDR_USER,
+      INVITE_NEW_PORTAL_USER,
+    ].includes(title);
+    const isEditUserPage = title === EDIT_USER_PROFILE;
+    const isViewUserPage =
+      title === `${selectedUser?.firstName} ${selectedUser?.lastName}`;
+    const isRoleManagementPage = title === ROLE_MANAGEMENT;
+    const isCreateNewRolePage = title === CREATE_NEW_ROLE;
+    const isViewRolePage = title === selectedRole?.name;
+    const isEditRolePage = title === EDIT_ROLE;
+
+    const defaultUsersTab = title;
+    const defaultTDRUserTab = typeCastQueryToString(tab) || PROFILE;
+
+    let buttonsOnRight;
+    let footer;
+
+    if (isUsersDashboardPage) {
+      footer = (
+        <Tabs
+          defaultActiveKey={defaultUsersTab}
+          onChange={onUsersTabChange}
+          items={usersTabItems}
+        />
+      );
+    } else if (isInviteNewUserPage) {
+      footer = inviteFooter;
+    } else if (isEditUserPage || isRoleManagementPage) {
+      footer = <div style={{ paddingBottom: 1 }} />;
+    } else if (isViewUserPage) {
+      buttonsOnRight = [
+        <Button key="0" onClick={onClickEdit}>
+          Edit
+        </Button>,
+        <Button key="1" onClick={() => setOpenResetPasswordModal(true)}>
+          Reset Password
+        </Button>,
+        <Dropdown
+          key="2"
+          menu={{
+            items: getDrowdownItems(selectedUser),
+            onClick: onClickDropdownItem,
+          }}
+          placement="bottomRight"
+          trigger={['click']}
+          overlayStyle={{ width: 120 }}
+        >
+          <Button className={styles.ellipsisButton}>
+            <EllipsisOutlined />
+          </Button>
+        </Dropdown>,
+        <ResetPasswordModal key="3" {...resetPasswordModalProps} />,
+        <ToggleArchiveUserProfileModal
+          key="4"
+          {...toggleArchiveUserModalProps}
+        />,
+        <ToggleUserProfileLockModal
+          key="5"
+          {...toggleUserProfileLockModalProps}
+        />,
+      ];
+      // TODO - add last audit log of the selected user
+      footer = (
+        <>
+          <div style={{ paddingBottom: 12 }}>
+            <Space>
+              <Badge color={NEUTRAL_5} />
+              <span>Logged out</span>
+            </Space>
+          </div>
+
+          {selectedUser?.type === UserType.TDR ? (
+            <Tabs
+              defaultActiveKey={defaultTDRUserTab}
+              onChange={onTDRUserTabChange}
+              items={tdrUserTabItems}
+            />
+          ) : (
+            <div style={{ paddingBottom: 4 }} />
+          )}
+        </>
+      );
+    } else if (isViewRolePage) {
+      buttonsOnRight = [
+        <Button key="0" onClick={onClickEdit}>
+          Edit
+        </Button>,
+        <Button key="1" onClick={() => setOpenArchiveRoleModal(true)}>
+          Archive
+        </Button>,
+        <ArchiveRoleModal key="2" {...archiveRoleModalProps} />,
+      ];
+      footer = (
+        <Tabs
+          activeKey={typeCastQueryToString(tab)}
+          items={viewRoleTabItems}
+          onChange={onRoleTabChange}
+        />
+      );
+    } else if (isCreateNewRolePage || isEditRolePage) {
+      buttonsOnRight = [
+        <Button key="0" onClick={rolePageHeaderBtnsClick.onCancel}>
+          Cancel
+        </Button>,
+        <Button key="1" type="primary" onClick={rolePageHeaderBtnsClick.onSave}>
+          Save
+        </Button>,
+      ];
+      footer = (
+        <Tabs
+          activeKey={typeCastQueryToString(tab)}
+          items={[viewRoleTabItems[0], viewRoleTabItems[2]]}
+          onChange={onRoleTabChange}
+        />
+      );
+    }
+
+    setButtonsOnRight(buttonsOnRight);
+    setFooter(footer);
+  }, [
+    tab,
     selectedUser,
     selectedRole,
-    router,
-    setLoading,
-    setOpenResetPasswordModal,
-    getSelectedUser,
-    setOpenToggleArchiveUserModal,
-    setOpenToggleUserProfileLockModal,
-    setOpenArchiveRoleModal,
-  };
-
-  const resetPasswordModalProps = {
-    loading,
-    open: openResetPasswordModal,
-    onSend: onSendResetPassword.bind(this, commonArgs),
-    onCancel: () => setOpenResetPasswordModal(false),
-  };
-
-  const toggleArchiveUserModalProps = {
-    loading,
-    open: openToggleArchiveUserModal,
-    onArchive: onToggleArchiveUserProfile.bind(this, commonArgs),
-    onCancel: () => setOpenToggleArchiveUserModal(false),
-  };
-
-  const toggleUserProfileLockModalProps = {
-    loading,
-    open: openToggleUserProfileLockModal,
-    onSubmit: onToggleUserProfileLock.bind(this, commonArgs),
-    onCancel: () => setOpenToggleUserProfileLockModal(false),
-  };
-
-  const archiveRoleModalProps = {
-    loading,
-    roleName: selectedRole ? selectedRole.name : '',
-    open: openArchiveRoleModal,
-    onSubmit: onArchiveRole.bind(this, commonArgs),
-    onCancel: () => setOpenArchiveRoleModal(false),
-  };
+    title,
+    onUsersTabChange,
+    onTDRUserTabChange,
+    onRoleTabChange,
+    archiveRoleModalProps,
+    resetPasswordModalProps,
+    toggleArchiveUserModalProps,
+    toggleUserProfileLockModalProps,
+    onClickEdit,
+    rolePageHeaderBtnsClick,
+  ]);
 
   return (
     <PageHeaderAntd
@@ -317,65 +400,7 @@ const PageHeader: React.FC = () => {
       }
       title={title}
       footer={footer}
-      extra={
-        router.pathname === ROUTE_CREATE_NEW_ROLE ||
-        router.pathname.includes('edit-role')
-          ? [
-              <Button key="0" onClick={rolePageHeaderBtnsClick.onCancel}>
-                Cancel
-              </Button>,
-              <Button
-                key="1"
-                type="primary"
-                onClick={rolePageHeaderBtnsClick.onSave}
-              >
-                Save
-              </Button>,
-            ]
-          : router.pathname.includes('role-management/[id]') &&
-            !router.pathname.includes('edit-role')
-          ? [
-              <Button key="0" onClick={onClickEdit}>
-                Edit
-              </Button>,
-              <Button key="1" onClick={() => setOpenArchiveRoleModal(true)}>
-                Archive
-              </Button>,
-              <ArchiveRoleModal key="2" {...archiveRoleModalProps} />,
-            ]
-          : router.pathname.includes('[id]') &&
-            !router.pathname.includes('edit-user-profile') && [
-              <Button key="0" onClick={onClickEdit}>
-                Edit
-              </Button>,
-              <Button key="1" onClick={() => setOpenResetPasswordModal(true)}>
-                Reset Password
-              </Button>,
-              <Dropdown
-                key="2"
-                menu={{
-                  items: getDrowdownItems(selectedUser),
-                  onClick: onClickDropdownItem,
-                }}
-                placement="bottomRight"
-                trigger={['click']}
-                overlayStyle={{ width: 120 }}
-              >
-                <Button className={styles.ellipsisButton}>
-                  <EllipsisOutlined />
-                </Button>
-              </Dropdown>,
-              <ResetPasswordModal key="3" {...resetPasswordModalProps} />,
-              <ToggleArchiveUserProfileModal
-                key="4"
-                {...toggleArchiveUserModalProps}
-              />,
-              <ToggleUserProfileLockModal
-                key="5"
-                {...toggleUserProfileLockModalProps}
-              />,
-            ]
-      }
+      extra={buttonsOnRight}
     ></PageHeaderAntd>
   );
 };
