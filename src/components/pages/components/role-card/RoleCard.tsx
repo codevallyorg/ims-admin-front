@@ -1,5 +1,6 @@
 import { Avatar, Col, List, Row } from 'antd';
 import { FC, useEffect, useState } from 'react';
+import Link from 'next/link';
 
 import Role from '@/services/role';
 import { IRole } from '@/types/entities/IRole';
@@ -7,14 +8,11 @@ import { showErrorNotification } from '@/utils/general';
 import { CHARACTER_SECONDARY } from '@/utils/colors';
 import { AntDesignOutlined, UserOutlined } from '@ant-design/icons';
 import styles from './RoleCard.module.css';
-import Link from 'next/link';
 import { ROUTE_ROLE_MANAGEMENT } from '@/utils/constants';
 
 const RoleCard: FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [roles, setRoles] = useState<IRole[]>([]);
-
-  console.log('RoleCard');
 
   useEffect(() => {
     const loadAllRoles = async () => {

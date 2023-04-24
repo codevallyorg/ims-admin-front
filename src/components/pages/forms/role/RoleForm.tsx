@@ -11,7 +11,11 @@ import {
 
 import { RoleSelectOptions } from '@/types/entities/IRole';
 import styles from './RoleForm.module.css';
-import { CreateRolePayload, RoleActionsPayload } from '@/types/payloads/role';
+import {
+  CreateRolePayload,
+  EditRolePayload,
+  RoleActionsPayload,
+} from '@/types/payloads/role';
 import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
 import { useForm } from 'antd/lib/form/Form';
 import Loader from '@/components/ui/loader/Loader';
@@ -20,6 +24,7 @@ import {
   getCategorisedActions,
   showErrorNotification,
   showNotification,
+  typeCastQueryToString,
 } from '@/utils/general';
 import Role from '@/services/role';
 import {
@@ -37,23 +42,21 @@ import UsersTable from '../../components/users-table/UsersTable';
 
 type RoleFormProps = {
   readOnly?: boolean;
-  defaultValues?: CreateRolePayload;
 };
 
-const RoleForm: FC<RoleFormProps> = ({ readOnly, defaultValues }) => {
+const RoleForm: FC<RoleFormProps> = ({ readOnly }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [roleSelectOptions, setRoleSelectOptions] = useState<
     RoleSelectOptions[]
   >([]);
-  const [roleData, setRoleData] = useState<CreateRolePayload | undefined>(
-    defaultValues,
-  );
+  const [roleData, setRoleData] = useState<CreateRolePayload>();
   const [categorisedActions, setCategorisedActions] =
     useState<CategorisedActions>({});
   const [actionsPermitted, setActionsPermitted] = useState<
     Record<number, RoleActionsPayload | undefined>
   >({});
 
+  const { selectedRole } = usePageHeaderContext();
   const router = useRouter();
   const { id, tab, filterByRole } = router.query;
 
@@ -64,13 +67,13 @@ const RoleForm: FC<RoleFormProps> = ({ readOnly, defaultValues }) => {
 
   const { setRolePageHeaderBtnsClick } = usePageHeaderContext();
 
-  const onSubmit = useCallback(
+  const onSubmitCreate = useCallback(
     async (data: CreateRolePayload) => {
       try {
         const actions: RoleActionsPayload[] = [];
 
         for (const key in actionsPermitted) {
-          if (actionsPermitted[key] === undefined) return;
+          if (actionsPermitted[key] === undefined) continue;
 
           // @ts-ignore
           actions.push(actionsPermitted[key]);
@@ -85,13 +88,13 @@ const RoleForm: FC<RoleFormProps> = ({ readOnly, defaultValues }) => {
             'We were unable to save your New Role. Please try again.',
           );
         }
+        router.push(ROUTE_ROLE_MANAGEMENT);
 
         const message = 'New Role Created';
         const description = `${data.name} was successfully created!`;
         const icon = <CheckCircleOutlined style={{ color: PRIMARY_BLUE }} />;
 
         showNotification({ message, description, icon });
-        router.push(ROUTE_ROLE_MANAGEMENT);
       } catch (err: any) {
         console.error(err);
         showErrorNotification(err);
@@ -100,19 +103,65 @@ const RoleForm: FC<RoleFormProps> = ({ readOnly, defaultValues }) => {
     [router, actionsPermitted],
   );
 
+  const onSubmitEdit = useCallback(
+    async (data: EditRolePayload) => {
+      try {
+        const actions: RoleActionsPayload[] = [];
+
+        for (const key in actionsPermitted) {
+          if (actionsPermitted[key] === undefined) continue;
+
+          // @ts-ignore
+          actions.push(actionsPermitted[key]);
+        }
+
+        data.RoleActions = actions;
+
+        const roleId = typeCastQueryToString(id);
+
+        const updatedRole = await Role.editRole(+roleId, data);
+
+        if (!updatedRole?.createdAt) {
+          throw new Error(
+            'We were unable to save your New Role. Please try again.',
+          );
+        }
+        router.push(ROUTE_ROLE_MANAGEMENT);
+
+        const message = 'Role Updated';
+        const description = `${data.name} was successfully updated!`;
+        const icon = <CheckCircleOutlined style={{ color: PRIMARY_BLUE }} />;
+
+        showNotification({ message, description, icon });
+      } catch (err: any) {
+        console.error(err);
+        showErrorNotification(err);
+      }
+    },
+    [router, id, actionsPermitted],
+  );
+
   useEffect(() => {
     const resetFormData = () => {
       setRoleData(undefined);
-      form.setFieldsValue(undefined);
+      form.setFieldsValue({
+        name: undefined,
+        description: undefined,
+        needsApprovalFrom: undefined,
+      });
     };
 
     const onSave = async () => {
+      setLoading(true);
       submitBtnRef.current?.click();
 
       await form.validateFields();
 
-      roleData && onSubmit(roleData);
-      resetFormData();
+      if (roleData) {
+        selectedRole ? onSubmitEdit(roleData) : onSubmitCreate(roleData);
+      }
+
+      setLoading(false);
     };
 
     const onCancel = () => {
@@ -121,7 +170,15 @@ const RoleForm: FC<RoleFormProps> = ({ readOnly, defaultValues }) => {
     };
 
     setRolePageHeaderBtnsClick({ onSave, onCancel });
-  }, [onSubmit, form, roleData, setRoleData, setRolePageHeaderBtnsClick]);
+  }, [
+    onSubmitCreate,
+    onSubmitEdit,
+    form,
+    roleData,
+    selectedRole,
+    setRoleData,
+    setRolePageHeaderBtnsClick,
+  ]);
 
   useEffect(() => {
     if (tab) return;
@@ -136,18 +193,29 @@ const RoleForm: FC<RoleFormProps> = ({ readOnly, defaultValues }) => {
   }, [tab, id, filterByRole, router]);
 
   useEffect(() => {
-    setRoleData(defaultValues);
+    if (!selectedRole || roleData) return;
+
+    const { name, description, needsApprovalFrom, RoleActions } = selectedRole;
+
+    const curRoleData: CreateRolePayload = {
+      name,
+      description,
+      needsApprovalFrom,
+    };
 
     const actionsPermitted: Record<number, RoleActionsPayload | undefined> = {};
 
-    defaultValues?.RoleActions?.map(
-      (action) => (actionsPermitted[action.actionId] = action),
-    );
+    RoleActions?.forEach((action) => {
+      actionsPermitted[action.actionId] = {
+        actionId: action.actionId,
+        needsApproval: action.needsApproval,
+      };
+    });
 
+    setRoleData(curRoleData);
     setActionsPermitted(actionsPermitted);
-
-    form.setFieldsValue(defaultValues);
-  }, [defaultValues, form]);
+    form.setFieldsValue(curRoleData);
+  }, [selectedRole, roleData, form]);
 
   useEffect(() => {
     const loadAllActions = async () => {
@@ -168,10 +236,14 @@ const RoleForm: FC<RoleFormProps> = ({ readOnly, defaultValues }) => {
 
     const loadRoleOptions = async () => {
       try {
+        setLoading(true);
+
         const roleOptions = await Role.getRoleSelectOptions();
         setRoleSelectOptions(roleOptions);
       } catch (err: any) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
 

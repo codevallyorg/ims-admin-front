@@ -1,4 +1,4 @@
-import { CreateRolePayload } from '@/types/payloads/role';
+import { CreateRolePayload, EditRolePayload } from '@/types/payloads/role';
 import { endpointUrl } from '@/utils/general';
 import axiosInstance from './axios';
 
@@ -16,4 +16,8 @@ export const getAllRoles = () => {
 
 export const getRole = (id: number) => {
   return axiosInstance.get(endpointUrl(`roles/${id}`));
+};
+
+export const editRole = (id: number, payload: EditRolePayload) => {
+  return axiosInstance.patch(endpointUrl(`roles/${id}`), payload);
 };

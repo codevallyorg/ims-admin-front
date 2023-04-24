@@ -3,8 +3,8 @@ import Private from '@/components/layout/Private';
 import { withLayout } from '@/components/layout/utils';
 import RoleForm from '@/components/pages/forms/role/RoleForm';
 
-const ViewRole: FC = () => {
-  return <RoleForm readOnly />;
+const EditRole: FC = () => {
+  return <RoleForm />;
 };
 
-export default withLayout(ViewRole, Private);
+export default withLayout(EditRole, Private);

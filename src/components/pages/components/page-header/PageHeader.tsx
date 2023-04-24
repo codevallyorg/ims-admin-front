@@ -212,11 +212,12 @@ const PageHeader: React.FC = () => {
     ) {
       setFooter(
         <Tabs
-          defaultActiveKey={typeCastQueryToString(tab)}
+          activeKey={typeCastQueryToString(tab)}
           items={
-            selectedRole
-              ? viewRoleTabItems
-              : [viewRoleTabItems[0], viewRoleTabItems[2]]
+            preparedPath === ROUTE_CREATE_NEW_ROLE ||
+            preparedPath.includes('edit-role')
+              ? [viewRoleTabItems[0], viewRoleTabItems[2]]
+              : viewRoleTabItems
           }
           onChange={onRoleTabChange}
         />,
@@ -243,11 +244,16 @@ const PageHeader: React.FC = () => {
   ]);
 
   const onClickEdit = () => {
-    const preparedRoute = router.pathname
-      .replace('[id]', typeCastQueryToString(router.query.id))
-      .concat('/edit-user-profile');
+    const preparedRoute = router.pathname.replace(
+      '[id]',
+      typeCastQueryToString(router.query.id),
+    );
 
-    router.push(preparedRoute);
+    const endpoint = preparedRoute.includes(ROUTE_ROLE_MANAGEMENT)
+      ? 'edit-role'
+      : 'edit-user-profile';
+
+    router.push(`${preparedRoute}/${endpoint}`);
   };
 
   const onClickDropdownItem = (info: any) => {
@@ -301,7 +307,8 @@ const PageHeader: React.FC = () => {
       title={title}
       footer={footer}
       extra={
-        router.pathname === ROUTE_CREATE_NEW_ROLE
+        router.pathname === ROUTE_CREATE_NEW_ROLE ||
+        router.pathname.includes('edit-role')
           ? [
               <Button key="0" onClick={rolePageHeaderBtnsClick.onCancel}>
                 Cancel

@@ -9,3 +9,5 @@ export type CreateRolePayload = {
   needsApprovalFrom: number[];
   RoleActions?: RoleActionsPayload[];
 };
+
+export type EditRolePayload = Partial<CreateRolePayload>;
