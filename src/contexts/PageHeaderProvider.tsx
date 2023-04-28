@@ -28,7 +28,11 @@ import {
   EDIT_ROLE,
   ROUTE_ROLE_MANAGEMENT,
 } from '@/utils/constants';
-import { preparePathname, showErrorNotification } from '@/utils/general';
+import {
+  preparePathname,
+  showErrorNotification,
+  showSentForApprovalNotification,
+} from '@/utils/general';
 import User from '@/services/user';
 import { IRole } from '@/types/entities/IRole';
 import Role from '@/services/role';
@@ -133,11 +137,16 @@ export const PageHeaderProvider: FC<PageHeaderProviderProps> = ({
         return;
       }
 
-      const user = await User.getUser(+id);
+      const { data } = await User.getUser(+id);
 
-      addIntoBreadcrumbNameMap(user);
+      if (data.sentForApproval) {
+        showSentForApprovalNotification();
+        return;
+      }
 
-      setSelectedUser(user);
+      addIntoBreadcrumbNameMap(data.result);
+
+      setSelectedUser(data.result);
     } catch (err: any) {
       console.error(err);
       showErrorNotification(err.message);

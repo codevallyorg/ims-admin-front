@@ -13,6 +13,7 @@ export const ROUTE_INVITE_NEW_TDR_USER = '/users/tdr-users/invite-new-tdr-user';
 export const ROUTE_CREATE_NEW_ROLE =
   '/admin-portal-settings/role-management/create-new-role';
 export const ROUTE_ROLE_MANAGEMENT = '/admin-portal-settings/role-management';
+export const ROUTE_APPROVALS = '/approvals';
 
 // Users
 export const USERS = 'Users';

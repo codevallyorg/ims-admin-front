@@ -1,7 +1,11 @@
 import { Dispatch, SetStateAction } from 'react';
 import User from '@/services/user';
 import { IUser } from '@/types/entities/IUser';
-import { showErrorNotification, showNotification } from '@/utils/general';
+import {
+  showErrorNotification,
+  showNotification,
+  showSentForApprovalNotification,
+} from '@/utils/general';
 import { PRIMARY_BLUE } from '@/utils/colors';
 import {
   CheckCircleOutlined,
@@ -40,10 +44,15 @@ export const onSendResetPassword = async ({
 
     setLoading(true);
 
-    const response = await User.resetPassword(+id);
+    const { data } = await User.resetPassword(+id);
 
-    if (!response.success) {
+    if (!data.success) {
       throw new Error('Something went wrong');
+    }
+
+    if (data.sentForApproval) {
+      showSentForApprovalNotification();
+      return;
     }
 
     showNotification({
@@ -71,10 +80,15 @@ export const onToggleArchiveUserProfile = async ({
 
     setLoading(true);
 
-    const response = await User.toggleArchiveUserProfile(+id);
+    const { data } = await User.toggleArchiveUserProfile(+id);
 
-    if (!response.success) {
+    if (!data.success) {
       throw new Error('Something went wrong');
+    }
+
+    if (data.sentForApproval) {
+      showSentForApprovalNotification();
+      return;
     }
 
     const message = `User ${
@@ -119,10 +133,15 @@ export const onToggleUserProfileLock = async ({
 
     setLoading(true);
 
-    const response = await User.toggleUserProfileLock(+id);
+    const { data } = await User.toggleUserProfileLock(+id);
 
-    if (!response.success) {
+    if (!data.success) {
       throw new Error('Something went wrong');
+    }
+
+    if (data.sentForApproval) {
+      showSentForApprovalNotification();
+      return;
     }
 
     const message = `Profile ${

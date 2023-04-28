@@ -26,6 +26,7 @@ import {
   getArray,
   showErrorNotification,
   showNotification,
+  showSentForApprovalNotification,
   typeCastQueryToString,
 } from '@/utils/general';
 import TableToolbar, {
@@ -88,23 +89,24 @@ const UsersTable: FC<UsersTableProps> = ({ userType, isViewRole }) => {
         return;
       }
 
-      const { data: users, meta } = await User.getAllUsers(
+      const { data } = await User.getAllUsers(
         router.query,
         isArchivedDashboard,
       );
 
-      setUsers(users);
-      setPageMeta(meta);
+      if (data.sentForApproval) {
+        showSentForApprovalNotification();
+        return;
+      }
+
+      setUsers(data.result.data);
+      setPageMeta(data.result.meta);
     } catch (err: any) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   }, [router, userType, isArchivedDashboard]);
-
-  useEffect(() => {
-    loadAllUsers();
-  }, [loadAllUsers]);
 
   useEffect(() => {
     let possibleTotalUsers = +typeCastQueryToString(router.query.page) * 10;
@@ -141,7 +143,8 @@ const UsersTable: FC<UsersTableProps> = ({ userType, isViewRole }) => {
     };
 
     loadRoleOptions();
-  }, []);
+    loadAllUsers();
+  }, [loadAllUsers]);
 
   const onClickInvite = () => {
     const url =
@@ -250,10 +253,15 @@ const UsersTable: FC<UsersTableProps> = ({ userType, isViewRole }) => {
     try {
       setPopconfirmSubmitting(true);
 
-      const response = await User.toggleArchiveUserProfile(user.id);
+      const { data } = await User.toggleArchiveUserProfile(user.id);
 
-      if (!response.success) {
+      if (!data.success) {
         throw new Error('Something went wrong');
+      }
+
+      if (data.sentForApproval) {
+        showSentForApprovalNotification();
+        return;
       }
 
       loadAllUsers();

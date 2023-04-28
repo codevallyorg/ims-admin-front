@@ -7,7 +7,11 @@ import { withLayout } from '@/components/layout/utils';
 import Private from '@/components/layout/Private';
 import { UserAddOutlined } from '@ant-design/icons';
 import { PRIMARY_BLUE } from '@/utils/colors';
-import { showErrorNotification, showNotification } from '@/utils/general';
+import {
+  showErrorNotification,
+  showNotification,
+  showSentForApprovalNotification,
+} from '@/utils/general';
 import TDRUserForm from '@/components/pages/forms/tdr-user/TDRUserForm';
 import { UserType } from '@/types/entities/IUser';
 import { defaultStyle, ROUTE_DASHBOARD_TDR_USERS } from '@/utils/constants';
@@ -27,9 +31,14 @@ const InviteNewTDRUser: FC = () => {
 
       data.mobile = `${data.mobile}`;
 
-      const newUser = await User.inviteNewUser(data);
+      const { data: response } = await User.inviteNewUser(data);
 
-      router.push(`${ROUTE_DASHBOARD_TDR_USERS}/${newUser.id}`);
+      router.push(ROUTE_DASHBOARD_TDR_USERS);
+
+      if (response.sentForApproval) {
+        showSentForApprovalNotification();
+        return;
+      }
 
       showNotification({
         message: 'New TDR User Invite Sent',

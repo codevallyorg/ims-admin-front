@@ -9,7 +9,11 @@ import Private from '@/components/layout/Private';
 import PortalUserForm from '@/components/pages/forms/portal-user/PortalUserForm';
 import { UserAddOutlined } from '@ant-design/icons';
 import { PRIMARY_BLUE } from '@/utils/colors';
-import { showErrorNotification, showNotification } from '@/utils/general';
+import {
+  showErrorNotification,
+  showNotification,
+  showSentForApprovalNotification,
+} from '@/utils/general';
 import { UserType } from '@/types/entities/IUser';
 
 const InviteNewPortalUser: FC = () => {
@@ -25,9 +29,14 @@ const InviteNewPortalUser: FC = () => {
       // @ts-ignore
       data.type = UserType.Portal;
 
-      await User.inviteNewUser(data);
+      const { data: response } = await User.inviteNewUser(data);
 
       router.push(ROUTE_DASHBOARD_PORTAL_USERS);
+
+      if (response.sentForApproval) {
+        showSentForApprovalNotification();
+        return;
+      }
 
       showNotification({
         message: 'New Portal User Invite Sent',
