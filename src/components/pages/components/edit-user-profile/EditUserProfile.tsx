@@ -12,7 +12,11 @@ import {
   ROUTE_DASHBOARD_PORTAL_USERS,
   ROUTE_DASHBOARD_TDR_USERS,
 } from '@/utils/constants';
-import { showErrorNotification, showNotification } from '@/utils/general';
+import {
+  showErrorNotification,
+  showNotification,
+  showSentForApprovalNotification,
+} from '@/utils/general';
 import { BellOutlined } from '@ant-design/icons';
 import { PRIMARY_BLUE } from '@/utils/colors';
 import { usePageHeaderContext } from '@/contexts/PageHeaderProvider';
@@ -38,7 +42,7 @@ const EditUserProfile: FC<EditUserProfileProps> = ({ userType }) => {
 
       setSubmitting(true);
 
-      await User.editUser(+selectedUser.id, data);
+      const { data: response } = await User.editUser(+selectedUser.id, data);
 
       getSelectedUser();
 
@@ -50,6 +54,12 @@ const EditUserProfile: FC<EditUserProfileProps> = ({ userType }) => {
           : ROUTE_DASHBOARD_TDR_USERS;
 
       router.push(url);
+
+      if (response.sentForApproval) {
+        showSentForApprovalNotification();
+        return;
+      }
+
       showNotification({
         message: `${userType} User Update`,
         description: `${data.firstName} ${data.lastName}'s user profile has been updated.`,

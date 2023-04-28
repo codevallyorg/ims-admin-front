@@ -47,17 +47,17 @@ export default class User {
 
   static async resetPassword(id: number) {
     const { data } = await resetPassword(id);
-    return data.data;
+    return data;
   }
 
   static async toggleArchiveUserProfile(id: number) {
     const { data } = await toggleArchiveUserProfile(id);
-    return data.data;
+    return data;
   }
 
   static async toggleUserProfileLock(id: number) {
     const { data } = await toggleUserProfileLock(id);
-    return data.data;
+    return data;
   }
 
   static async reassignRole(userIds: number[], roleId: number) {

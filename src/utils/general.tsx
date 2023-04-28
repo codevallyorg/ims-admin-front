@@ -2,6 +2,9 @@ import { notification } from 'antd';
 import { IconType } from 'antd/lib/notification';
 import localFont from 'next/font/local';
 import { ReactNode } from 'react';
+
+import { PRIMARY_BLUE } from './colors';
+import { CheckCircleOutlined } from '@ant-design/icons';
 import { PaginationOptions } from '@/types/payloads/pagination';
 import { CategorisedActions, IAction } from '@/types/entities/IAction';
 
@@ -52,6 +55,16 @@ export const showNotification = (notificationData: NotificationProps) => {
     icon,
     style: poppins.style,
   });
+};
+
+export const showSentForApprovalNotification = () => {
+  const notificationData = {
+    message: 'Sent for approval',
+    description: 'Approval request has been sent',
+    icon: <CheckCircleOutlined style={{ color: PRIMARY_BLUE }} />,
+  };
+
+  showNotification(notificationData);
 };
 
 export const showErrorNotification = (error: any) => {

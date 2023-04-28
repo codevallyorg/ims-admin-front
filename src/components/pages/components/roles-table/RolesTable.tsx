@@ -16,6 +16,7 @@ import {
   getArray,
   showErrorNotification,
   showNotification,
+  showSentForApprovalNotification,
   typeCastQueryToString,
 } from '@/utils/general';
 import TableToolbar, {
@@ -67,10 +68,15 @@ const RolesTable: FC = () => {
 
       if (!page) return;
 
-      const { data: users, meta } = await User.getAllUsers(router.query);
+      const { data } = await User.getAllUsers(router.query);
 
-      setUsers(users);
-      setPageMeta(meta);
+      if (data.sentForApproval) {
+        showSentForApprovalNotification();
+        return;
+      }
+
+      setUsers(data.result.data);
+      setPageMeta(data.result.meta);
     } catch (err: any) {
       console.error(err);
     } finally {

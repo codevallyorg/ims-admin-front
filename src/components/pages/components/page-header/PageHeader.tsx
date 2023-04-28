@@ -274,7 +274,7 @@ const PageHeader: React.FC = () => {
     if (isUsersDashboardPage) {
       footer = (
         <Tabs
-          defaultActiveKey={defaultUsersTab}
+          activeKey={defaultUsersTab}
           onChange={onUsersTabChange}
           items={usersTabItems}
         />
@@ -327,7 +327,7 @@ const PageHeader: React.FC = () => {
 
           {selectedUser?.type === UserType.TDR ? (
             <Tabs
-              defaultActiveKey={defaultTDRUserTab}
+              activeKey={defaultTDRUserTab}
               onChange={onTDRUserTabChange}
               items={tdrUserTabItems}
             />
