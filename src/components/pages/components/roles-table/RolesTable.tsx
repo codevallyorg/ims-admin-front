@@ -70,11 +70,6 @@ const RolesTable: FC = () => {
 
       const { data } = await User.getAllUsers(router.query);
 
-      if (data.sentForApproval) {
-        showSentForApprovalNotification();
-        return;
-      }
-
       setUsers(data.result.data);
       setPageMeta(data.result.meta);
     } catch (err: any) {

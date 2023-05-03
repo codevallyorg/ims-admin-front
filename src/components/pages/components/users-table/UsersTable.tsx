@@ -1,10 +1,15 @@
 import { FilterValue, TablePaginationConfig } from 'antd/lib/table/interface';
 import { useRouter } from 'next/router';
 import { FC, useCallback, useEffect, useState } from 'react';
-import { Empty, Table } from 'antd';
+import { Alert, Empty, Table } from 'antd';
 
 import User from '@/services/user';
 import { IUser, UserStatus, UserType } from '@/types/entities/IUser';
+import {
+  ActionCategory,
+  ActionName,
+  ActionSubject,
+} from '@/types/entities/IAction';
 import {
   OrderByEnum,
   OrderEnum,
@@ -40,6 +45,8 @@ import { PRIMARY_BLUE } from '@/utils/colors';
 import Exclamation from '@/icons/Exclamation';
 import EmptyText from '@/components/ui/empty-text/EmptyText';
 import Role from '@/services/role';
+import { useAuthContext } from '@/contexts/AuthProvider';
+import { classNames } from '@/utils/general';
 
 type UsersTableProps = {
   userType?: UserType;
@@ -49,6 +56,8 @@ type UsersTableProps = {
 const UsersTable: FC<UsersTableProps> = ({ userType, isViewRole }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [users, setUsers] = useState<IUser[]>([]);
+  const [isViewUsersPermitted, setIsViewUsersPermitted] =
+    useState<boolean>(true);
   const [pageMeta, setPageMeta] = useState<PageMeta>();
   const [possibleTotalUsers, setPossibleTotalUsers] = useState<number>(0);
   const [popconfirmSubmitting, setPopconfirmSubmitting] =
@@ -56,6 +65,7 @@ const UsersTable: FC<UsersTableProps> = ({ userType, isViewRole }) => {
   const [roleOptions, setRoleOptions] = useState<RoleOption[]>();
 
   const router = useRouter();
+  const { roleActionsMap } = useAuthContext();
 
   const isArchivedDashboard = userType === UserType.Archived;
 
@@ -89,24 +99,34 @@ const UsersTable: FC<UsersTableProps> = ({ userType, isViewRole }) => {
         return;
       }
 
+      if (!isArchivedDashboard) {
+        const actionCategory =
+          userType === UserType.Portal
+            ? ActionCategory.PortalUsers
+            : ActionCategory.TDRUsers;
+
+        const actionKey = `${actionCategory}${ActionSubject.Profile}${ActionName.ReadAll}`;
+
+        if (!roleActionsMap[actionKey]) {
+          setIsViewUsersPermitted(false);
+          return;
+        }
+      }
+
       const { data } = await User.getAllUsers(
         router.query,
         isArchivedDashboard,
       );
 
-      if (data.sentForApproval) {
-        showSentForApprovalNotification();
-        return;
-      }
-
       setUsers(data.result.data);
       setPageMeta(data.result.meta);
+      setIsViewUsersPermitted(true);
     } catch (err: any) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [router, userType, isArchivedDashboard]);
+  }, [router, userType, isArchivedDashboard, roleActionsMap]);
 
   useEffect(() => {
     let possibleTotalUsers = +typeCastQueryToString(router.query.page) * 10;
@@ -290,15 +310,27 @@ const UsersTable: FC<UsersTableProps> = ({ userType, isViewRole }) => {
   ] = ['View Report', onSelectRoleItem];
 
   switch (userType) {
-    case UserType.Portal:
+    case UserType.Portal: {
       name = PORTAL_USERS;
-      primaryButtonLabel = INVITE_NEW_PORTAL_USER;
-      break;
 
-    case UserType.TDR:
-      name = TDR_USERS;
-      primaryButtonLabel = INVITE_NEW_TDR_USER;
+      const actionKey = `${ActionCategory.PortalUsers}${ActionSubject.Profile}${ActionName.Create}`;
+
+      if (roleActionsMap[actionKey]) {
+        primaryButtonLabel = INVITE_NEW_PORTAL_USER;
+      }
       break;
+    }
+
+    case UserType.TDR: {
+      name = TDR_USERS;
+
+      const actionKey = `${ActionCategory.TDRUsers}${ActionSubject.Profile}${ActionName.Create}`;
+
+      if (roleActionsMap[actionKey]) {
+        primaryButtonLabel = INVITE_NEW_TDR_USER;
+      }
+      break;
+    }
 
     case UserType.Archived:
       name = ARCHIVED_USERS;
@@ -323,16 +355,16 @@ const UsersTable: FC<UsersTableProps> = ({ userType, isViewRole }) => {
     onSearch,
   };
 
-  if (!loading && users.length === 0) {
+  if (!loading && isArchivedDashboard && users.length === 0) {
     return (
       <Empty image={<Exclamation />} description={false}>
         <EmptyText>
-          No user have been{' '}
-          {isViewRole
+          No user have been archived yet.
+          {/* {isViewRole
             ? 'assigned to this Role.'
             : isArchivedDashboard
             ? 'archived yet.'
-            : 'registered yet.'}
+            : 'registered yet.'} */}
         </EmptyText>
       </Empty>
     );
@@ -342,39 +374,56 @@ const UsersTable: FC<UsersTableProps> = ({ userType, isViewRole }) => {
     <div>
       <TableToolbar {...toolbarProps} />
 
-      <Table
-        columns={getColumns(
-          router,
-          isArchivedDashboard,
-          popconfirmSubmitting,
-          onUnarchive,
-        )}
-        dataSource={users}
-        rowSelection={isArchivedDashboard ? undefined : {}}
-        loading={loading}
-        rowClassName={styles.row}
-        onChange={columnActionsHandler}
-        rowKey={(record) => record.id}
-        pagination={{
-          responsive: true,
-          hideOnSinglePage:
-            pageMeta?.page === 1 && pageMeta.hasNextPage === false,
-          current: +typeCastQueryToString(router.query.page) || 1,
-          total: possibleTotalUsers,
-        }}
-        onRow={(record) => {
-          return {
-            onClick: () => {
-              const subUrl =
-                record.type === UserType.Portal
-                  ? ROUTE_DASHBOARD_PORTAL_USERS
-                  : ROUTE_DASHBOARD_TDR_USERS;
+      {isViewUsersPermitted ? (
+        <Table
+          columns={getColumns(
+            router,
+            isArchivedDashboard,
+            popconfirmSubmitting,
+            onUnarchive,
+            roleActionsMap,
+            userType,
+          )}
+          dataSource={users}
+          rowSelection={isArchivedDashboard ? undefined : {}}
+          loading={loading}
+          rowClassName={classNames(styles.row, styles.cursorPointer)}
+          onChange={columnActionsHandler}
+          rowKey={(record) => record.id}
+          pagination={{
+            responsive: true,
+            hideOnSinglePage:
+              pageMeta?.page === 1 && pageMeta.hasNextPage === false,
+            current: +typeCastQueryToString(router.query.page) || 1,
+            total: possibleTotalUsers,
+          }}
+          onRow={(record) => {
+            let actionCategory = ActionCategory.PortalUsers;
+            let suburl = ROUTE_DASHBOARD_PORTAL_USERS;
 
-              router.push(`${subUrl}/${record.id}`);
-            },
-          };
-        }}
-      />
+            if (record.type === UserType.TDR) {
+              actionCategory = ActionCategory.TDRUsers;
+              suburl = ROUTE_DASHBOARD_TDR_USERS;
+            }
+
+            let rowClickHandler: any = () => {
+              router.push(`${suburl}/${record.id}`);
+            };
+
+            const viewUserActionKey = `${actionCategory}${ActionSubject.Profile}${ActionName.Read}`;
+
+            if (!roleActionsMap[viewUserActionKey]) {
+              rowClickHandler = undefined;
+            }
+
+            return {
+              onClick: rowClickHandler,
+            };
+          }}
+        />
+      ) : (
+        <Alert type="info" message="Not permitted!" showIcon />
+      )}
     </div>
   );
 };

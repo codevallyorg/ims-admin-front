@@ -18,6 +18,12 @@ import {
 } from '@/utils/constants';
 import { OrderByEnum, OrderEnum } from '@/types/payloads/pagination';
 import { ExclamationCircleFilled } from '@ant-design/icons';
+import { RoleActionsMap } from '@/contexts/AuthProvider';
+import {
+  ActionCategory,
+  ActionName,
+  ActionSubject,
+} from '@/types/entities/IAction';
 
 const popconfirmTitle = 'Are you sure you would like to unachive this profile?';
 
@@ -48,6 +54,8 @@ export const getColumns = (
   isArchivedDashboard: boolean,
   popconfirmSubmitting: boolean,
   onUnarchive: (user: IUser) => void,
+  roleActionsMap: RoleActionsMap,
+  userType?: UserType,
 ): ColumnsType<IUser> => {
   const { orderBy, order, filterByStatus, filterByType } = router.query;
 
@@ -69,7 +77,7 @@ export const getColumns = (
       typeof filterByStatus === 'string' ? [filterByStatus] : filterByStatus;
   }
 
-  return [
+  const columns: ColumnsType<IUser> = [
     {
       title: 'First name',
       dataIndex: 'firstName',
@@ -135,36 +143,93 @@ export const getColumns = (
       key: 'updatedAt',
       render: (time: string) => getTimestampValue(time),
     },
-    {
+    // {
+    //   title: 'Action',
+    //   key: 'action',
+    //   render: (_, user) => {
+    //     return !isArchivedDashboard ? (
+    //       <Link
+    //         href={`${dashboardUrl}/${user.id}/edit-user-profile`}
+    //         onClick={stopPropagation}
+    //       >
+    //         Edit
+    //       </Link>
+    //     ) : (
+    //       <a onClick={stopPropagation} style={{ display: 'block' }}>
+    //         <Popconfirm
+    //           title={popconfirmTitle}
+    //           placement="topRight"
+    //           okText="Yes"
+    //           cancelText="No"
+    //           okButtonProps={{
+    //             loading: popconfirmSubmitting,
+    //             style: popconfirmButtonsStyle,
+    //           }}
+    //           cancelButtonProps={{ style: popconfirmButtonsStyle }}
+    //           onConfirm={onUnarchive.bind(this, user)}
+    //           icon={<ExclamationCircleFilled style={{ color: PRIMARY_RED }} />}
+    //         >
+    //           <div>Unarchive</div>
+    //         </Popconfirm>
+    //       </a>
+    //     );
+    //   },
+    // },
+  ];
+
+  if (!userType) return columns;
+
+  if (isArchivedDashboard) {
+    // const unarchiveActionKey = `${actionCategory}${ActionSubject.Profile}${ActionName.UnArchive}`;
+
+    // if (roleActionsMap[unarchiveActionKey]) {
+    columns.push({
       title: 'Action',
       key: 'action',
-      render: (_, user) =>
-        !isArchivedDashboard ? (
+      render: (_, user) => (
+        <a onClick={stopPropagation} style={{ display: 'block' }}>
+          <Popconfirm
+            title={popconfirmTitle}
+            placement="topRight"
+            okText="Yes"
+            cancelText="No"
+            okButtonProps={{
+              loading: popconfirmSubmitting,
+              style: popconfirmButtonsStyle,
+            }}
+            cancelButtonProps={{ style: popconfirmButtonsStyle }}
+            onConfirm={onUnarchive.bind(this, user)}
+            icon={<ExclamationCircleFilled style={{ color: PRIMARY_RED }} />}
+          >
+            <div>Unarchive</div>
+          </Popconfirm>
+        </a>
+      ),
+    });
+    // }
+  } else {
+    const actionCategory =
+      userType === UserType.Portal
+        ? ActionCategory.PortalUsers
+        : ActionCategory.TDRUsers;
+
+    const editActionKey = `${actionCategory}${ActionSubject.Profile}${ActionName.Update}`;
+
+    if (roleActionsMap[editActionKey]) {
+      columns.push({
+        title: 'Action',
+        key: 'action',
+        render: (_, user) => (
           <Link
             href={`${dashboardUrl}/${user.id}/edit-user-profile`}
             onClick={stopPropagation}
           >
             Edit
           </Link>
-        ) : (
-          <a onClick={stopPropagation} style={{ display: 'block' }}>
-            <Popconfirm
-              title={popconfirmTitle}
-              placement="topRight"
-              okText="Yes"
-              cancelText="No"
-              okButtonProps={{
-                loading: popconfirmSubmitting,
-                style: popconfirmButtonsStyle,
-              }}
-              cancelButtonProps={{ style: popconfirmButtonsStyle }}
-              onConfirm={onUnarchive.bind(this, user)}
-              icon={<ExclamationCircleFilled style={{ color: PRIMARY_RED }} />}
-            >
-              <div>Unarchive</div>
-            </Popconfirm>
-          </a>
         ),
-    },
-  ];
+      });
+    }
+  }
+
+  return columns;
 };

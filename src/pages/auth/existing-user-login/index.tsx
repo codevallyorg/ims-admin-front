@@ -15,7 +15,7 @@ import { useAuthContext } from '@/contexts/AuthProvider';
 const ExistingUserLogin: FC = () => {
   const [loading, setLoading] = useState(false);
 
-  const { getUser } = useAuthContext();
+  const { getUserWithRole } = useAuthContext();
 
   const onSubmit = async (data: LoginPayload) => {
     try {
@@ -23,7 +23,7 @@ const ExistingUserLogin: FC = () => {
 
       await Auth.login(data);
 
-      getUser();
+      getUserWithRole();
     } catch (err: any) {
       console.error(err);
     } finally {

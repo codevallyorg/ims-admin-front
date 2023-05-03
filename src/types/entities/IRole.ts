@@ -1,3 +1,4 @@
+import { IAction } from './IAction';
 import { IUser } from './IUser';
 
 export type RoleSelectOptions = {
@@ -9,6 +10,7 @@ export type RoleActions = {
   id: number;
   roleId: number;
   actionId: number;
+  action: IAction;
   needsApproval: true;
   createdAt: string;
   updatedAt: string;

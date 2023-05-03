@@ -28,7 +28,7 @@ const NewUserLogin: FC<NewUserLoginProps> = ({ isResetPassword }) => {
   const [user, setUser] = useState<IUser>();
   const [submitting, setSubmitting] = useState<boolean>(false);
 
-  const { getUser } = useAuthContext();
+  const { getUserWithRole } = useAuthContext();
   const router = useRouter();
   const { token } = router.query;
 
@@ -66,7 +66,7 @@ const NewUserLogin: FC<NewUserLoginProps> = ({ isResetPassword }) => {
       };
 
       await Auth.newUserLogin(payload);
-      getUser();
+      getUserWithRole();
     } catch (err: any) {
       console.error(err);
     } finally {

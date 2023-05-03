@@ -31,7 +31,7 @@ type EditUserProfileProps = {
 const EditUserProfile: FC<EditUserProfileProps> = ({ userType }) => {
   const [submitting, setSubmitting] = useState<boolean>(false);
 
-  const { user, getUser } = useAuthContext();
+  const { user, getUserWithRole } = useAuthContext();
   const { loadingPageHeader, selectedUser, getSelectedUser } =
     usePageHeaderContext();
   const router = useRouter();
@@ -46,7 +46,7 @@ const EditUserProfile: FC<EditUserProfileProps> = ({ userType }) => {
 
       getSelectedUser();
 
-      if (user?.id === selectedUser.id) getUser();
+      if (user?.id === selectedUser.id) getUserWithRole();
 
       const url =
         userType === UserType.Portal

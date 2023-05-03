@@ -14,13 +14,13 @@ import { FC, ReactNode } from 'react';
 import styles from './UserProfile.module.css';
 
 const UserProfile: FC = () => {
-  const { user, getUser } = useAuthContext();
+  const { user, getUserWithRole } = useAuthContext();
 
   const onItemClick = (title: string) => {
     switch (title) {
       case 'Logout':
         Auth.logout();
-        getUser();
+        getUserWithRole();
         break;
     }
   };

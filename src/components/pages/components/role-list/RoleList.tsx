@@ -94,7 +94,9 @@ const RoleList: FC = () => {
             </Col>
 
             <Col style={{ alignSelf: 'center' }}>
-              <a>Edit</a>
+              <Link href={`${ROUTE_ROLE_MANAGEMENT}/${item.id}/edit-role`}>
+                Edit
+              </Link>
             </Col>
           </Row>
         </List.Item>

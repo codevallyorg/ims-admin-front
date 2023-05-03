@@ -39,6 +39,7 @@ import { useRouter } from 'next/router';
 import { CategorisedActions } from '@/types/entities/IAction';
 import Permissions from '../../components/permissions/Permissions';
 import UsersTable from '../../components/users-table/UsersTable';
+import { useAuthContext } from '@/contexts/AuthProvider';
 
 type RoleFormProps = {
   readOnly?: boolean;
@@ -56,6 +57,7 @@ const RoleForm: FC<RoleFormProps> = ({ readOnly }) => {
     Record<number, RoleActionsPayload | undefined>
   >({});
 
+  const { getUserWithRole } = useAuthContext();
   const { selectedRole } = usePageHeaderContext();
   const router = useRouter();
   const { id, tab, filterByRole } = router.query;
@@ -126,6 +128,8 @@ const RoleForm: FC<RoleFormProps> = ({ readOnly }) => {
             'We were unable to save your New Role. Please try again.',
           );
         }
+
+        getUserWithRole();
         router.push(ROUTE_ROLE_MANAGEMENT);
 
         const message = 'Role Updated';
@@ -138,7 +142,7 @@ const RoleForm: FC<RoleFormProps> = ({ readOnly }) => {
         showErrorNotification(err);
       }
     },
-    [router, id, actionsPermitted],
+    [router, id, actionsPermitted, getUserWithRole],
   );
 
   useEffect(() => {

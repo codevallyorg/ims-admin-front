@@ -9,11 +9,16 @@ import {
 } from 'react';
 import { IUser } from '@/types/entities/IUser';
 import Auth from '@/services/auth';
+import Role from '@/services/role';
+import { IAction } from '@/types/entities/IAction';
+
+export type RoleActionsMap = Record<string, boolean>;
 
 type AuthContextProps = {
   user: IUser | null;
+  roleActionsMap: RoleActionsMap;
   authLoading: boolean;
-  getUser: () => void;
+  getUserWithRole: () => void;
 };
 
 type AuthProviderProps = {
@@ -22,15 +27,17 @@ type AuthProviderProps = {
 
 const AuthContext = createContext<AuthContextProps>({
   user: null,
+  roleActionsMap: {},
   authLoading: false,
-  getUser: () => {},
+  getUserWithRole: () => {},
 });
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<IUser | null>(null);
+  const [roleActionsMap, setRoleActionsMap] = useState<RoleActionsMap>({});
   const [authLoading, setAuthLoading] = useState<boolean>(true);
 
-  const getUser = useCallback(async () => {
+  const getUserWithRole = useCallback(async () => {
     try {
       setAuthLoading(true);
 
@@ -38,12 +45,27 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
 
       if (!token) {
         setUser(null);
+        setRoleActionsMap({});
         return;
       }
 
       const user = await Auth.whoAmI();
 
+      const role = await Role.getRole(user.roleId);
+
+      const newRoleActionsMap: RoleActionsMap = {};
+
+      role.RoleActions.forEach((roleAction: any) => {
+        const action: IAction = roleAction.action;
+        const { category, subject, name } = action;
+
+        const actionKey = `${category}${subject}${name}`;
+
+        newRoleActionsMap[actionKey] = true;
+      });
+
       setUser(user);
+      setRoleActionsMap(newRoleActionsMap);
     } catch (err: any) {
       console.error(err);
     } finally {
@@ -52,11 +74,13 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    getUser();
-  }, [getUser]);
+    getUserWithRole();
+  }, [getUserWithRole]);
 
   return (
-    <AuthContext.Provider value={{ user, authLoading, getUser }}>
+    <AuthContext.Provider
+      value={{ user, roleActionsMap, authLoading, getUserWithRole }}
+    >
       {children}
     </AuthContext.Provider>
   );

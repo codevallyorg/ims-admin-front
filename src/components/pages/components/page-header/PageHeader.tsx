@@ -58,6 +58,12 @@ import {
 } from './tabs';
 import ArchiveRoleModal from '../../modals/archive-role/ArchiveRoleModal';
 import { UserType } from '@/types/entities/IUser';
+import { useAuthContext } from '@/contexts/AuthProvider';
+import {
+  ActionCategory,
+  ActionName,
+  ActionSubject,
+} from '@/types/entities/IAction';
 
 const inviteFooter = (
   <div style={{ paddingBottom: 14 }}>
@@ -88,6 +94,7 @@ const PageHeader: React.FC = () => {
     selectedRole,
     rolePageHeaderBtnsClick,
   } = usePageHeaderContext();
+  const { roleActionsMap } = useAuthContext();
   const router = useRouter();
   const { pathname } = router;
   const { id, tab } = router.query;
@@ -284,27 +291,43 @@ const PageHeader: React.FC = () => {
     } else if (isEditUserPage || isRoleManagementPage) {
       footer = <div style={{ paddingBottom: 1 }} />;
     } else if (isViewUserPage) {
+      const actionCategory =
+        selectedUser?.type === UserType.Portal
+          ? ActionCategory.PortalUsers
+          : ActionCategory.TDRUsers;
+
+      const resetPasswordActionKey = `${actionCategory}${ActionSubject.Profile}${ActionName.ResetPassword}`;
+      const editActionKey = `${actionCategory}${ActionSubject.Profile}${ActionName.Update}`;
+
+      const dropdownMenuItems = getDrowdownItems(selectedUser, roleActionsMap);
+
       buttonsOnRight = [
-        <Button key="0" onClick={onClickEdit}>
-          Edit
-        </Button>,
-        <Button key="1" onClick={() => setOpenResetPasswordModal(true)}>
-          Reset Password
-        </Button>,
-        <Dropdown
-          key="2"
-          menu={{
-            items: getDrowdownItems(selectedUser),
-            onClick: onClickDropdownItem,
-          }}
-          placement="bottomRight"
-          trigger={['click']}
-          overlayStyle={{ width: 120 }}
-        >
-          <Button className={styles.ellipsisButton}>
-            <EllipsisOutlined />
+        roleActionsMap[editActionKey] ? (
+          <Button key="0" onClick={onClickEdit}>
+            Edit
           </Button>
-        </Dropdown>,
+        ) : undefined,
+        roleActionsMap[resetPasswordActionKey] ? (
+          <Button key="1" onClick={() => setOpenResetPasswordModal(true)}>
+            Reset Password
+          </Button>
+        ) : undefined,
+        dropdownMenuItems.length ? (
+          <Dropdown
+            key="2"
+            menu={{
+              items: dropdownMenuItems,
+              onClick: onClickDropdownItem,
+            }}
+            placement="bottomRight"
+            trigger={['click']}
+            overlayStyle={{ width: 120 }}
+          >
+            <Button className={styles.ellipsisButton}>
+              <EllipsisOutlined />
+            </Button>
+          </Dropdown>
+        ) : undefined,
         <ResetPasswordModal key="3" {...resetPasswordModalProps} />,
         <ToggleArchiveUserProfileModal
           key="4"
@@ -387,6 +410,7 @@ const PageHeader: React.FC = () => {
     toggleUserProfileLockModalProps,
     onClickEdit,
     rolePageHeaderBtnsClick,
+    roleActionsMap,
   ]);
 
   return (

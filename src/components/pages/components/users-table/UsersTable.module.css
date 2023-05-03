@@ -1,4 +1,7 @@
 .row {
   font-weight: 400;
+}
+
+.cursorPointer {
   cursor: pointer;
 }

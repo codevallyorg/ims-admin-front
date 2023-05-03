@@ -161,7 +161,7 @@ const SiderLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
 
         <Menu
-          defaultSelectedKeys={defaultSelectedItemKey}
+          selectedKeys={defaultSelectedItemKey}
           mode="inline"
           items={items}
           onSelect={({ key }) => onSelectMenuItem(key)}

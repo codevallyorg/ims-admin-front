@@ -68,10 +68,15 @@ export const showSentForApprovalNotification = () => {
 };
 
 export const showErrorNotification = (error: any) => {
+  const description =
+    error.response.status === 403
+      ? 'Action not permitted'
+      : error.response.data.message;
+
   showNotification({
     type: 'error',
     message: 'Error',
-    description: error.message,
+    description,
   });
 };
 
