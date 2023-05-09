@@ -30,3 +30,7 @@ export type IRole = {
   users: IUser[];
   RoleActions: RoleActions[];
 };
+
+export enum RoleEnum {
+  SuperAdmin = 'SuperAdmin',
+}

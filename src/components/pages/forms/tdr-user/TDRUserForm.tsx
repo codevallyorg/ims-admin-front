@@ -1,5 +1,6 @@
-import { Form, Input, InputNumber, Select, Space } from 'antd';
+import { Form, Input, Select, Space } from 'antd';
 import { FC, useEffect, useState } from 'react';
+import { MaskedInput, IMask } from 'antd-mask-input';
 
 import Button from '@/components/ui/button/Button';
 import Role from '@/services/role';
@@ -13,6 +14,20 @@ type TDRUserFormProps = {
   onSubmit?: (data: InviteTDRUserPayload) => void;
   readOnly?: boolean;
   defaultValues?: IUser;
+};
+
+const applyMask = (mobile: string = '') => {
+  let maskedMobile = mobile;
+
+  if (mobile.length === 4) {
+    maskedMobile = mobile.substring(0, 3) + ' ' + mobile.charAt(3);
+  }
+
+  if (mobile.length === 8) {
+    maskedMobile = mobile.substring(0, 7) + ' ' + mobile.charAt(7);
+  }
+
+  return maskedMobile;
 };
 
 const TDRUserForm: FC<TDRUserFormProps> = ({
@@ -55,7 +70,7 @@ const TDRUserForm: FC<TDRUserFormProps> = ({
         remember: true,
         ...tdrDefaultData,
       }}
-      onFinish={onSubmit}
+      onFinish={(data) => console.log(data)}
       autoComplete="off"
       className={styles.form}
     >
@@ -85,9 +100,15 @@ const TDRUserForm: FC<TDRUserFormProps> = ({
           },
           () => ({
             validator(_, value) {
-              if (!value || (!isNaN(value) && `${value}`.length === 10)) {
+              const enteredNumber = value.split(' ').join('');
+
+              if (
+                !enteredNumber ||
+                (!isNaN(enteredNumber) && `${enteredNumber}`.length === 10)
+              ) {
                 return Promise.resolve();
               }
+
               return Promise.reject(
                 new Error('Please enter a valid 10 digit mobile number'),
               );
@@ -95,7 +116,27 @@ const TDRUserForm: FC<TDRUserFormProps> = ({
           }),
         ]}
       >
-        <Input readOnly={readOnly} placeholder="0123456789" />
+        {/* <Input
+          id="mobileInput"
+          readOnly={readOnly}
+          placeholder="012 345 6789"
+        /> */}
+        <MaskedInput
+          id="mobileInput"
+          readOnly={readOnly}
+          mask={'000 000 0000'}
+          placeholder="012 345 6789"
+          maskOptions={{
+            placeholderChar: ' ',
+            // prepare: (value) => {
+            //   console.log(value);
+            //   return value;
+            // },
+            validate: (value, mask) => {
+              return true;
+            },
+          }}
+        />
       </Form.Item>
 
       <Form.Item

@@ -6,7 +6,7 @@ import Public from '@/components/layout/Public';
 import { withLayout } from '@/components/layout/utils';
 import Button from '@/components/ui/button/Button';
 import FairPayLogo from '@/icons/FairPayLogo';
-import { classNames } from '@/utils/general';
+import { classNames, showErrorNotification } from '@/utils/general';
 import styles from './NewUserLogin.module.css';
 import Loader from '@/components/ui/loader/Loader';
 import { IUser } from '@/types/entities/IUser';
@@ -35,7 +35,10 @@ const NewUserLogin: FC<NewUserLoginProps> = ({ isResetPassword }) => {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        if (!token || typeof token !== 'string') return;
+        if (!token || typeof token !== 'string') {
+          router.replace(ROUTE_EXISTING_USER_LOGIN);
+          return;
+        }
 
         setLoading(true);
 
@@ -44,13 +47,14 @@ const NewUserLogin: FC<NewUserLoginProps> = ({ isResetPassword }) => {
         setUser(user);
       } catch (err: any) {
         console.error(err);
+        showErrorNotification(err);
         router.replace(ROUTE_EXISTING_USER_LOGIN);
       } finally {
         setLoading(false);
       }
     };
 
-    loadUserData();
+    router.isReady && loadUserData();
   }, [router, token]);
 
   const onSubmit = async (data: FormData) => {
@@ -88,7 +92,7 @@ const NewUserLogin: FC<NewUserLoginProps> = ({ isResetPassword }) => {
     };
   }
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className={styles.pageContainer}>
         <Loader />

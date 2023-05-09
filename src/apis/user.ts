@@ -7,6 +7,7 @@ import {
 } from '@/types/payloads/user';
 import { endpointUrl, getPaginatedUrl } from '@/utils/general';
 import axiosInstance from './axios';
+import { UserType } from '@/types/entities/IUser';
 
 export const inviteNewUser = (
   payload: InvitePortalUserPayload | InviteTDRUserPayload,
@@ -21,6 +22,17 @@ export const getAllUsers = (
   return axiosInstance.get(
     getPaginatedUrl(`${archived ? 'users/archived' : 'users'}`, pageOptions),
   );
+};
+
+export const countUsers = (userType?: UserType) => {
+  let query;
+
+  if (userType) {
+    query =
+      userType === UserType.Archived ? `archived=true` : `type=${userType}`;
+  }
+
+  return axiosInstance.get(endpointUrl(`users/count?${query}`));
 };
 
 export const getUser = (id: number) => {

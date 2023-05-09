@@ -64,6 +64,7 @@ import {
   ActionName,
   ActionSubject,
 } from '@/types/entities/IAction';
+import { RoleEnum } from '@/types/entities/IRole';
 
 const inviteFooter = (
   <div style={{ paddingBottom: 14 }}>
@@ -360,15 +361,16 @@ const PageHeader: React.FC = () => {
         </>
       );
     } else if (isViewRolePage) {
-      buttonsOnRight = [
-        <Button key="0" onClick={onClickEdit}>
-          Edit
-        </Button>,
-        <Button key="1" onClick={() => setOpenArchiveRoleModal(true)}>
-          Archive
-        </Button>,
-        <ArchiveRoleModal key="2" {...archiveRoleModalProps} />,
-      ];
+      if (selectedRole?.name !== RoleEnum.SuperAdmin)
+        buttonsOnRight = [
+          <Button key="0" onClick={onClickEdit}>
+            Edit
+          </Button>,
+          <Button key="1" onClick={() => setOpenArchiveRoleModal(true)}>
+            Archive
+          </Button>,
+          <ArchiveRoleModal key="2" {...archiveRoleModalProps} />,
+        ];
       footer = (
         <Tabs
           activeKey={typeCastQueryToString(tab)}

@@ -1,4 +1,5 @@
 import {
+  countUsers,
   editUser,
   getAllUsers,
   getUser,
@@ -8,6 +9,7 @@ import {
   toggleArchiveUserProfile,
   toggleUserProfileLock,
 } from '@/apis/user';
+import { UserType } from '@/types/entities/IUser';
 import { PaginationOptions } from '@/types/payloads/pagination';
 import {
   EditPortalUserPayload,
@@ -29,6 +31,11 @@ export default class User {
     archived: boolean = false,
   ) {
     const { data } = await getAllUsers(paginationOptions, archived);
+    return data;
+  }
+
+  static async count(type?: UserType) {
+    const { data } = await countUsers(type);
     return data;
   }
 

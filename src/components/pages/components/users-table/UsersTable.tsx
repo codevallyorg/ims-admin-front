@@ -99,6 +99,20 @@ const UsersTable: FC<UsersTableProps> = ({ userType, isViewRole }) => {
         return;
       }
 
+      const { count } = await User.count(userType);
+      const maxPage = Math.ceil(count / 10);
+      const pageNumber = +typeCastQueryToString(page);
+
+      if (isNaN(pageNumber)) {
+        router.replace({ query: { ...router.query, page: 1 } });
+        return;
+      }
+
+      if (pageNumber > maxPage) {
+        router.replace({ query: { ...router.query, page: maxPage } });
+        return;
+      }
+
       if (!isArchivedDashboard) {
         const actionCategory =
           userType === UserType.Portal
@@ -396,6 +410,7 @@ const UsersTable: FC<UsersTableProps> = ({ userType, isViewRole }) => {
               pageMeta?.page === 1 && pageMeta.hasNextPage === false,
             current: +typeCastQueryToString(router.query.page) || 1,
             total: possibleTotalUsers,
+            showSizeChanger: false,
           }}
           onRow={(record) => {
             let actionCategory = ActionCategory.PortalUsers;

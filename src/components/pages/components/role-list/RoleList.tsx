@@ -3,7 +3,7 @@ import { FC, useEffect, useState } from 'react';
 import Link from 'next/link';
 
 import Role from '@/services/role';
-import { IRole } from '@/types/entities/IRole';
+import { IRole, RoleEnum } from '@/types/entities/IRole';
 import { showErrorNotification } from '@/utils/general';
 import { CHARACTER_SECONDARY } from '@/utils/colors';
 import { AntDesignOutlined, UserOutlined } from '@ant-design/icons';
@@ -94,9 +94,11 @@ const RoleList: FC = () => {
             </Col>
 
             <Col style={{ alignSelf: 'center' }}>
-              <Link href={`${ROUTE_ROLE_MANAGEMENT}/${item.id}/edit-role`}>
-                Edit
-              </Link>
+              {item.name !== RoleEnum.SuperAdmin && (
+                <Link href={`${ROUTE_ROLE_MANAGEMENT}/${item.id}/edit-role`}>
+                  Edit
+                </Link>
+              )}
             </Col>
           </Row>
         </List.Item>

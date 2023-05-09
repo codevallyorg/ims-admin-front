@@ -68,6 +68,20 @@ const RolesTable: FC = () => {
 
       if (!page) return;
 
+      const { count } = await User.count();
+      const maxPage = Math.ceil(count / 10);
+      const pageNumber = +typeCastQueryToString(page);
+
+      if (isNaN(pageNumber)) {
+        router.replace({ query: { ...router.query, page: 1 } });
+        return;
+      }
+
+      if (pageNumber > maxPage) {
+        router.replace({ query: { ...router.query, page: maxPage } });
+        return;
+      }
+
       const { data } = await User.getAllUsers(router.query);
 
       setUsers(data.result.data);
@@ -285,6 +299,7 @@ const RolesTable: FC = () => {
             pageMeta?.page === 1 && pageMeta.hasNextPage === false,
           current: +typeCastQueryToString(router.query.page) || 1,
           total: possibleTotalUsers,
+          showSizeChanger: false,
         }}
         onRow={(record) => {
           return {
